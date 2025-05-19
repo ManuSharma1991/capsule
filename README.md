@@ -1,8 +1,9 @@
 # <img src="YOUR_CAPSULE_LOGO_URL_OR_PATH_HERE_PLACEHOLDER" alt="Capsule Logo" width="50" valign="middle"> Capsule
 
+
 **Your Noob-Friendly Docker Management Dashboard – Take control of your containers with ease!**
 
-[![Build Status](https://img.shields.io/github/actions/workflow/status/ManuSharma1991/capsule/.github/workflows/docker-publish.yml?branch=master&style=for-the-badge)](https://github.com/ManuSharma1991/capsule/actions)
+[![Build Status](https://github.com/ManuSharma1991/capsule/actions/workflows/docker-publish.yml/badge.svg?branch=master)](https://github.com/ManuSharma1991/capsule/actions)
 [![Docker Pulls](https://img.shields.io/docker/pulls/manuviswanadha/capsule?style=for-the-badge)](https://hub.docker.com/r/manuviswanadha/capsule)
 [![License](https://img.shields.io/github/license/ManuSharma1991/capsule?style=for-the-badge)](LICENSE)
 ![Version](https://img.shields.io/badge/version-v0.1.0--alpha-blue?style=for-the-badge) <!-- Update as you release -->
@@ -62,13 +63,13 @@ While tools like Portainer are powerful, they can still be overwhelming for begi
 
     services:
       capsule:
-        image: manuviswanadha/capsule:latest # Replace with your Docker Hub username
+        image: manuviswanadha/capsule:latest # Your Docker Hub username and image
         container_name: capsule
         restart: unless-stopped
         ports:
           - "10000:10000" # Or your preferred host port
         volumes:
-          - /var/run/docker.sock:/var/run/docker.sock:ro # Read-only recommended for security
+          - /var/run/docker.sock:/var/run/docker.sock # Mount Docker socket
           - capsule_data:/app/data # Persistent storage for Capsule's configuration
         # Optional: Set Timezone
         # environment:
@@ -95,11 +96,7 @@ Capsule launches with initial wizard-driven support for:
     *   Browse library & play media directly in Capsule (Basic player initially).
 *   **The \*arr Stack:**
     *   **Sonarr:** TV Show management.
-    <!-- *   **Radarr:** Movie management.
-    *   **Lidarr:** Music management.
-    *   **Readarr:** Book/Magazine/Audiobook management.
-    *   **Prowlarr:** Indexer management for the *arrs.
-    *   **Bazarr:** Subtitle management for Sonarr/Radarr. -->
+    *   *(More \*arrs like Radarr, Prowlarr, etc., coming soon!)*
 
 *More applications will be added regularly! Check our roadmap.*
 
@@ -108,7 +105,7 @@ Capsule launches with initial wizard-driven support for:
 ## 🗺️ Roadmap (Upcoming Features)
 
 *   [ ] Full Jellyfin library browsing and enhanced media player.
-*   [ ] Deeper integration with *arr stack (e.g., view download queue, add new media).
+*   [ ] Deeper integration with *arr stack (Radarr, Prowlarr, etc. - view download queue, add new media).
 *   [ ] User authentication for Capsule access.
 *   [ ] One-click updates for managed applications.
 *   [ ] Backup and restore functionality for Capsule's configuration.
@@ -124,19 +121,19 @@ We welcome contributions! Whether it's feature requests, bug reports, documentat
 1.  Open an issue on GitHub.
 2.  Fork the repository and submit a pull request.
 
-Please read our `CONTRIBUTING.md` (you'll create this later) for more details.
+*(A `CONTRIBUTING.md` file with more details will be added soon.)*
 
 ---
 
 ## 🐞 Reporting Issues
 
-If you find a bug or have a problem, please [open an issue](https://github.com/YOUR_GITHUB_USERNAME/capsule/issues) on GitHub. Provide as much detail as possible, including steps to reproduce, logs, and your environment.
+If you find a bug or have a problem, please [open an issue](https://github.com/ManuSharma1991/capsule/issues) on GitHub. Provide as much detail as possible, including steps to reproduce, logs, and your environment.
 
 ---
 
 ## 📜 License
 
-This project is licensed under the [MIT License](LICENSE). <!-- Or choose another license -->
+This project is licensed under the [MIT License](LICENSE).
 
 ---
-Made with ❤️ by [Manu Sharma/Capsule](https://github.com/ManuSharma1991)
+Made with ❤️ by [Manu Sharma](https://github.com/ManuSharma1991)
