@@ -5,9 +5,9 @@ WORKDIR /app/frontend
 # Copy package files and install dependencies
 COPY frontend/package.json frontend/package-lock.json* frontend/pnpm-lock.yaml* ./
 # Choose your package manager (npm, yarn, or pnpm)
-# RUN npm ci
+RUN npm ci
 # RUN yarn install --frozen-lockfile
-RUN corepack enable && pnpm install --frozen-lockfile
+# RUN corepack enable && pnpm install --frozen-lockfile
 
 
 # Copy the rest of the frontend source code
