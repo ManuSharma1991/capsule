@@ -24,9 +24,9 @@ WORKDIR /app/backend
 # Copy package files and install dependencies
 COPY backend/package.json backend/package-lock.json* backend/pnpm-lock.yaml* ./
 # Choose your package manager
-# RUN npm ci
+RUN npm ci
 # RUN yarn install --frozen-lockfile
-RUN corepack enable && pnpm install --frozen-lockfile
+# RUN corepack enable && pnpm install --frozen-lockfile
 
 # Copy the rest of the backend source code
 COPY backend/ ./
