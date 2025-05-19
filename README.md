@@ -4,9 +4,9 @@
 **Your Noob-Friendly Docker Management Dashboard – Take control of your containers with ease!**
 
 [![Build Status](https://github.com/ManuSharma1991/capsule/actions/workflows/docker-publish.yml/badge.svg?branch=master)](https://github.com/ManuSharma1991/capsule/actions)
-[![Docker Pulls](https://img.shields.io/docker/pulls/manuviswanadha/capsule?style=for-the-badge)](https://hub.docker.com/r/manuviswanadha/capsule)
-[![License](https://img.shields.io/github/license/ManuSharma1991/capsule?style=for-the-badge)](LICENSE)
-![Version](https://img.shields.io/badge/version-v0.1.0--alpha-blue?style=for-the-badge) <!-- Update as you release -->
+[![Docker Pulls](https://img.shields.io/docker/pulls/manuviswanadha/capsule)](https://hub.docker.com/r/manuviswanadha/capsule)
+[![License](https://img.shields.io/github/license/ManuSharma1991/capsule)](LICENSE)
+![Version](https://img.shields.io/badge/version-v0.1.0--alpha-blue) <!-- Update as you release -->
 
 Capsule is a web-based Docker management tool designed with simplicity and user-friendliness at its core. Say goodbye to complex YAML and cryptic commands. Capsule provides an intuitive "App Store" like experience to deploy and manage popular self-hosted applications like Jellyfin, the *arr stack (Sonarr, Radarr, Prowlarr, Bazarr), and more, all through guided wizards and a clean interface.
 
