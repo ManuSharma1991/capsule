@@ -1,72 +1,108 @@
 # ---- Stage 1: Build Frontend ----
-FROM node:18-alpine AS frontend-builder
+FROM node:24-alpine AS frontend-builder
 WORKDIR /app/frontend
+ENV NODE_ENV=development 
 
-# Copy package files and install dependencies
-COPY frontend/package.json frontend/package-lock.json* frontend/pnpm-lock.yaml* ./
-# Choose your package manager (npm, yarn, or pnpm)
+RUN echo "--- [FRONTEND] Stage 1: Starting Frontend Build ---"
+
+RUN echo "--- [FRONTEND] Copying package files ---"
+COPY frontend/package.json frontend/package-lock.json ./
+# If using pnpm: COPY frontend/pnpm-lock.yaml ./
+# If using yarn: COPY frontend/yarn.lock ./
+
+RUN echo "--- [FRONTEND] Installing dependencies (npm ci) ---"
 RUN npm ci
-# RUN yarn install --frozen-lockfile
-# RUN corepack enable && pnpm install --frozen-lockfile
+# If using pnpm: RUN corepack enable && pnpm install --frozen-lockfile
+# If using yarn: RUN yarn install --frozen-lockfile
 
+RUN echo "--- [FRONTEND] Listing node_modules/.bin to check for vite and tsc ---"
+RUN ls -l node_modules/.bin || echo "node_modules/.bin not found or empty"
+RUN test -f node_modules/.bin/vite && echo "Vite CLI found" || echo "Vite CLI NOT FOUND"
+RUN test -f node_modules/.bin/tsc && echo "TSC CLI found" || echo "TSC CLI NOT FOUND"
 
-# Copy the rest of the frontend source code
+RUN echo "--- [FRONTEND] Copying rest of frontend source code ---"
 COPY frontend/ ./
 
-# Build the frontend
+RUN echo "--- [FRONTEND] Running build script: npm run build (tsc -b && vite build) ---"
 RUN npm run build
-# Assuming vite builds to 'dist' inside frontend/
+RUN echo "--- [FRONTEND] Listing frontend build output (dist directory) ---"
+RUN ls -R dist || echo "Frontend dist directory not found"
+RUN echo "--- [FRONTEND] Stage 1: Frontend Build Complete ---"
+
 
 # ---- Stage 2: Build Backend ----
-FROM node:18-alpine AS backend-builder
+FROM node:24-alpine AS backend-builder
 WORKDIR /app/backend
+ENV NODE_ENV=development 
 
-# Copy package files and install dependencies
-COPY backend/package.json backend/package-lock.json* backend/pnpm-lock.yaml* ./
-# Choose your package manager
+RUN echo "--- [BACKEND] Stage 2: Starting Backend Build ---"
+
+RUN echo "--- [BACKEND] Copying package files ---"
+COPY backend/package.json backend/package-lock.json ./
+# If using pnpm: COPY backend/pnpm-lock.yaml ./
+# If using yarn: COPY backend/yarn.lock ./
+
+RUN echo "--- [BACKEND] Installing dependencies (npm ci) ---"
 RUN npm ci
-# RUN yarn install --frozen-lockfile
-# RUN corepack enable && pnpm install --frozen-lockfile
+# If using pnpm: RUN corepack enable && pnpm install --frozen-lockfile
+# If using yarn: RUN yarn install --frozen-lockfile
 
-# Copy the rest of the backend source code
+RUN echo "--- [BACKEND] Listing node_modules/.bin to check for tsc ---"
+RUN ls -l node_modules/.bin || echo "node_modules/.bin not found or empty"
+RUN test -f node_modules/.bin/tsc && echo "TSC CLI found" || echo "TSC CLI NOT FOUND in backend"
+
+RUN echo "--- [BACKEND] Copying rest of backend source code ---"
 COPY backend/ ./
 
-# Build the backend (compile TypeScript to JavaScript)
+RUN echo "--- [BACKEND] Running build script: npm run build (tsc) ---"
 RUN npm run build
-# Assuming your build script outputs to 'dist' inside backend/
+RUN echo "--- [BACKEND] Listing backend build output (dist directory) ---"
+RUN ls -R dist || echo "Backend dist directory not found"
+RUN echo "--- [BACKEND] Stage 2: Backend Build Complete ---"
+
 
 # ---- Stage 3: Production Image ----
-FROM node:18-alpine
+FROM node:24-alpine
 WORKDIR /app
-
-# Set environment to production
 ENV NODE_ENV=production
+
+RUN echo "--- [PROD] Stage 3: Starting Production Image Setup ---"
+
+# Install runtime dependencies only (npm ci --omit=dev)
+# Need to copy package.json and package-lock.json first for this stage as well
+COPY backend/package.json backend/package-lock.json ./
+RUN echo "--- [PROD] Installing backend runtime dependencies ---"
+RUN npm ci --omit=dev
+# If you had frontend runtime dependencies that weren't bundled (rare for Vite), handle similarly.
 
 # Create a non-root user and group
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
 # Copy built backend from backend-builder stage
-COPY --from=backend-builder /app/backend/dist ./dist
-COPY --from=backend-builder /app/backend/node_modules ./node_modules
-COPY --from=backend-builder /app/backend/package.json ./package.json
-# If you have other necessary files from backend (like templates), copy them too
-# COPY --from=backend-builder /app/backend/src/templates ./dist/templates
+# We copy the whole dist, not just specific files from node_modules, because npm ci handled runtime deps
+RUN echo "--- [PROD] Copying built backend artifacts ---"
+COPY --from=backend-builder --chown=appuser:appgroup /app/backend/dist ./dist
+# If your backend needs templates or other static assets from src, copy them too
+# COPY --from=backend-builder --chown=appuser:appgroup /app/backend/src/templates ./dist/templates
 
 # Copy built frontend from frontend-builder stage
-COPY --from=frontend-builder /app/frontend/dist ./frontend_build
+RUN echo "--- [PROD] Copying built frontend artifacts ---"
+COPY --from=frontend-builder --chown=appuser:appgroup /app/frontend/dist ./frontend_build
 
-# Create data directory and set permissions (if backend creates db here)
+# Create data directory and set permissions
+RUN echo "--- [PROD] Creating data directory ---"
 RUN mkdir -p /app/data && chown appuser:appgroup /app/data
 
-# Switch to non-root user
+# Change to non-root user
 USER appuser
 
 # Expose the application port
 EXPOSE 10000
 
 # Command to run the application
-# Adjust if your entry point is different, e.g., dist/server.js
+# Assumes your backend's compiled entry point is dist/index.js
 CMD ["node", "dist/index.js"]
+RUN echo "--- [PROD] Stage 3: Production Image Setup Complete ---"
 
 # Optional: Add a healthcheck
 # HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
