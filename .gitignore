@@ -1,0 +1,100 @@
+# Node.js & General Dependencies
+# -------------------------------
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+package-lock.json # If you are using pnpm or yarn and want to commit their lockfiles instead
+# yarn.lock        # If you are using npm or pnpm
+# pnpm-lock.yaml   # If you are using npm or yarn
+
+# Build Output Directories
+# ------------------------
+# Backend (TypeScript compilation output)
+backend/dist/
+backend/build/ # If you ever use a different build output name
+
+# Frontend (Vite build output)
+frontend/dist/
+frontend/build/ # If you ever use a different build output name
+frontend/.vite/  # Vite's cache and pre-bundling directory
+
+# IDE & Editor Specific
+# ---------------------
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw? # Swap files (e.g., Vim)
+
+# OS Specific
+# -----------
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Log Files
+# ---------
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Environment Variables
+# ---------------------
+.env
+.env.*
+!.env.example # Important: Allow committing an example env file
+
+# Coverage Reports
+# ----------------
+coverage/
+.nyc_output/
+
+# Temporary Files & Archives
+# --------------------------
+*.tmp
+*.temp
+*.tar.gz
+*.zip
+*.rar
+
+# SQLite Databases (if you don't want to commit local dev dbs)
+# ---------------
+# If your SQLite database is stored in a specific location you don't want committed.
+# For example, if it's directly in backend/ or frontend/ for local dev.
+# However, if it's inside a 'data' volume managed by Docker, this might not be necessary
+# for the gitignore itself, but ensure the volume is not part of the image.
+# backend/dev.db
+# backend/data/*.db
+
+# Specific to Create React App (if you ever used it or its remnants)
+# --------------------------------------------------------------------
+# build/
+
+# TypeScript
+# ----------
+# *.tsbuildinfo # TypeScript incremental build information
+
+# Test Runner Specific
+# --------------------
+# .jest-cache/
+
+# Other
+# -----
+# Any other project-specific files or directories to ignore
+# For example, if you generate documentation locally:
+# docs/_build/
+
+# Docker (usually you want to commit Dockerfile and docker-compose.yml)
+# If you have local Docker volumes or caches you want to ignore from git
+# (though this is usually handled outside of gitignore for Docker itself)
+# .dockerignore might be a better place for files specific to the Docker build context.
