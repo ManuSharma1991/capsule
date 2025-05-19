@@ -2,7 +2,7 @@
 
 **Your Noob-Friendly Docker Management Dashboard – Take control of your containers with ease!**
 
-[![Build Status](https://img.shields.io/github/actions/workflow/status/ManuSharma1991/capsule/docker-publish.yml?branch=master&style=for-the-badge)](https://github.com/ManuSharma1991/capsule/actions)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/ManuSharma1991/capsule/.github/workflows/docker-publish.yml?branch=master&style=for-the-badge)](https://github.com/ManuSharma1991/capsule/actions)
 [![Docker Pulls](https://img.shields.io/docker/pulls/manuviswanadha/capsule?style=for-the-badge)](https://hub.docker.com/r/manuviswanadha/capsule)
 [![License](https://img.shields.io/github/license/ManuSharma1991/capsule?style=for-the-badge)](LICENSE)
 ![Version](https://img.shields.io/badge/version-v0.1.0--alpha-blue?style=for-the-badge) <!-- Update as you release -->
