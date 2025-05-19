@@ -3,12 +3,12 @@ name: Docker Image CI for Capsule
 # Controls when the workflow will run
 on:
   push:
-    branches: ["main"] # Trigger on pushes to the main branch
+    branches: ["master"] # Trigger on pushes to the main branch
     # You can also trigger on tags for releases:
     # tags:
     #   - 'v*.*.*'
   pull_request:
-    branches: ["main"] # Optionally build (but not push) on PRs to main
+    branches: ["master"] # Optionally build (but not push) on PRs to main
 
 jobs:
   build-and-push-image:
@@ -42,8 +42,6 @@ jobs:
           tags: | # Tags for your image
             ${{ secrets.DOCKERHUB_USERNAME }}/capsule:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/capsule:${{ github.sha }}
-            # If triggering on git tags, you can add:
-            # ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') && format('{0}/{1}:{2}', secrets.DOCKERHUB_USERNAME, 'capsule', github.ref_name) || '' }}
           # Optional: Add build arguments
           # build-args: |
           #   ARG_NAME=value
