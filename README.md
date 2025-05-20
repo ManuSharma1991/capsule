@@ -1,4 +1,12 @@
-# <img src="YOUR_CAPSULE_LOGO_URL_OR_PATH_HERE_PLACEHOLDER" alt="Capsule Logo" width="50" valign="middle"> Capsule
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset=".github/assets/capsule-logo-dark.png">
+    <source media="(prefers-color-scheme: light)" srcset=".github/assets/capsule-logo-light.png">
+    <img alt="Capsule Logo" src=".github/assets/capsule-logo-light.png" width="100">
+  </picture>
+</p>
+
+<h1 align="center">Capsule</h1>
 
 
 **Your Noob-Friendly Docker Management Dashboard – Take control of your containers with ease!**
