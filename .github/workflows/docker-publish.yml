@@ -39,6 +39,7 @@ jobs:
           context: . # Path to the directory containing your Dockerfile and source (root in this case)
           file: ./Dockerfile # Path to your Dockerfile
           push: ${{ github.event_name != 'pull_request' }} # Push only if it's not a PR
+          platforms: linux/amd64,linux/arm64
           tags: | # Tags for your image
             ${{ secrets.DOCKERHUB_USERNAME }}/capsule:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/capsule:${{ github.sha }}
