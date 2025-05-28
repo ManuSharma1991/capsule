@@ -2,6 +2,7 @@ import express, { Express, Request, Response, NextFunction } from 'express';
 import path from 'path';
 import cors from 'cors';
 import morgan from 'morgan'; // HTTP request logger middleware
+import { getDbConnection } from './db';
 
 // --- Import API Routers ---
 // Example: import dockerRoutes from './api/dockerRoutes';
@@ -36,8 +37,10 @@ app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 // app.use('/api/settings', settingsRoutes);
 
 // Example Health Check Endpoint
-app.get('/api/health', (req: Request, res: Response) => {
-    res.status(200).json({ status: 'UP', message: 'Capsule backend is healthy!' });
+app.get('/api/health', async (req: Request, res: Response) => {
+    const db = await getDbConnection();
+    const dbPath = process.env.DATABASE_URL || path.join(__dirname, '../data/database.sqlite');
+    res.status(200).json({ status: 'UP', message: `Capsule backend is healthy! and [Server] Connecting to SQLite database at: ${dbPath}` });
 });
 
 // --- Serve Frontend Static Files (Production Only) ---

@@ -1,24 +1,11 @@
 import app from './server'; // Import the configured Express app
 import path from 'path';
 import fs from 'fs';
+import { getDbConnection } from './db';
 
 // --- Configuration ---
 const PORT: number = parseInt(process.env.PORT || '10000', 10);
 const HOST: string = process.env.HOST || '0.0.0.0'; // Listen on all available network interfaces
-
-// --- Database Initialization (Example for SQLite) ---
-// You would typically initialize your SQLite connection here
-// For example, using 'better-sqlite3' or 'sqlite3'
-// import Database from 'better-sqlite3';
-// const dbPath = path.join(__dirname, '..', '..', 'data', 'capsule.db'); // Adjust path if needed
-// Make sure the data directory exists
-// const dataDir = path.dirname(dbPath);
-// if (!fs.existsSync(dataDir)) {
-//     fs.mkdirSync(dataDir, { recursive: true });
-// }
-// export const db = new Database(dbPath, { verbose: console.log });
-// console.log(`SQLite database connected at ${dbPath}`);
-// db.exec("CREATE TABLE IF NOT EXISTS managed_apps (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, config TEXT)");
 
 
 // --- Start the Server ---
@@ -33,15 +20,16 @@ const server = app.listen(PORT, HOST, () => {
 const signals = ['SIGINT', 'SIGTERM', 'SIGQUIT'] as const;
 
 signals.forEach((signal) => {
-    process.on(signal, () => {
+    process.on(signal, async () => {
+        const db = await getDbConnection();
         console.log(`\nReceived ${signal}, shutting down gracefully...`);
-        server.close(() => {
+        server.close(async () => {
             console.log('HTTP server closed.');
-            // Close database connection if you have one
-            // if (db && db.open) {
-            //     db.close();
-            //     console.log('Database connection closed.');
-            // }
+            if (db) {
+                await db.open();
+                db.close();
+                console.log('Database connection closed.');
+            }
             process.exit(0);
         });
 
