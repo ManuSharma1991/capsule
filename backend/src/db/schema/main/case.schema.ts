@@ -1,16 +1,8 @@
+import { sql } from "drizzle-orm";
 import { int, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
-
-export const usersTable = sqliteTable("users_table", {
-  id: int().primaryKey({ autoIncrement: true }),
-  name: text().notNull(),
-  empId: int().notNull(),
-  email: text().notNull().unique(),
-});
-
 
 export const caseTable = sqliteTable("case_table", {
   // Standard auto-incrementing primary key
-  id: int("id").primaryKey({ autoIncrement: true }),
 
   // one of {"ITA","MA","SA"}
   case_type: text("case_type", { enum: ['ITA', 'MA', 'SA'] }).notNull(),
@@ -33,7 +25,7 @@ export const caseTable = sqliteTable("case_table", {
   // constructed by the database schema itself. It must be generated in your
   // application code before inserting/updating the record.
   // We add a unique constraint assuming the combination of its parts makes it unique.
-  case_no: text("case_no").notNull().unique(),
+  case_no: text("case_no").notNull().unique().primaryKey(),
 
   // either "ASSESSEE" or "DEPARTMENT"
   filed_by: text("filed_by", { enum: ['ASSESSEE', 'DEPARTMENT'] }).notNull(),
@@ -81,4 +73,8 @@ export const caseTable = sqliteTable("case_table", {
 
   // notes (can be null)
   notes: text("notes"),
+  is_detail_present: int("is_detail_present").default(0).notNull(),
+  needs_review: int("needs_review").default(0).notNull(),
+  created_at: int("created_at", { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`).notNull(),
+  updated_at: int("updated_at", { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`).$onUpdate(() => sql`(strftime('%s', 'now'))`).notNull(),
 });

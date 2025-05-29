@@ -3,9 +3,9 @@ import { defineConfig } from 'drizzle-kit';
 
 export default defineConfig({
   out: './drizzle',
-  schema: './src/schema/schema.ts',
+  schema: './src/db/schema/staging/index.ts',
   dialect: 'sqlite',
   dbCredentials: {
-    url: process.env.STAGING_DB_FILE_NAME!,
+    url: process.env.PRODUCTION_DB_FILE_NAME!,
   },
 });
