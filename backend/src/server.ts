@@ -2,7 +2,10 @@ import express, { Express, Request, Response, NextFunction } from 'express';
 import path from 'path';
 import cors from 'cors';
 import morgan from 'morgan'; // HTTP request logger middleware
-import { getDbConnection } from './db';
+
+import swaggerUi from 'swagger-ui-express';
+import swaggerJsdoc from 'swagger-jsdoc';
+import {swaggerOptions} from './swaggerConfig';
 
 // --- Import API Routers ---
 // Example: import dockerRoutes from './api/dockerRoutes';
@@ -11,6 +14,8 @@ import { getDbConnection } from './db';
 
 // --- Initialize Express App ---
 const app: Express = express();
+const swaggerSpec = swaggerJsdoc(swaggerOptions);
+
 
 // --- Middleware ---
 // Enable CORS - configure appropriately for your needs
@@ -30,16 +35,10 @@ app.use(express.urlencoded({ extended: true })); // For parsing application/x-ww
 // 'dev' format is good for development. Consider 'combined' for production.
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 
-// --- API Routes ---
-// Mount your API routers here
-// app.use('/api/docker', dockerRoutes);
-// app.use('/api/appstore', appStoreRoutes);
-// app.use('/api/settings', settingsRoutes);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-// Example Health Check Endpoint
 app.get('/api/health', async (req: Request, res: Response) => {
-    const db = await getDbConnection();
-    const dbPath = process.env.DATABASE_URL || path.join(__dirname, '../data/database.sqlite');
+    const dbPath = process.env.DATABASE_URL || path.join(__dirname, './db/database.sqlite');
     res.status(200).json({ status: 'UP', message: `Capsule backend is healthy! and [Server] Connecting to SQLite database at: ${dbPath}` });
 });
 
