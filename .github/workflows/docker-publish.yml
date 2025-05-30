@@ -49,3 +49,10 @@ jobs:
           # Optional: Cache Docker layers to speed up builds
           cache-from: type=gha
           cache-to: type=gha,mode=max
+      - name: Trigger Portainer Webhook to Redeploy Stack
+        if: success() # Only run if previous steps were successful
+        run: curl -X POST ${{ secrets.PORTAINER_WEBHOOK_STACK_REDEPLOY_URL }}
+        # You can also use a dedicated GitHub Action for this if you prefer, e.g.:
+        # uses: distillerycat/portainer-webhook@master
+        # with:
+        #   webhook_url: ${{ secrets.PORTAINER_WEBHOOK_STACK_REDEPLOY_URL }}

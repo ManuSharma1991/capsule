@@ -1,6 +1,7 @@
 import app from './server'; // Import the configured Express app
 import path from 'path';
 import fs from 'fs';
+import logger from './utils/logger'; // Import the logger utility
 
 // --- Configuration ---
 const PORT: number = parseInt(process.env.PORT || '10000', 10);
@@ -9,6 +10,7 @@ const HOST: string = process.env.HOST || '0.0.0.0'; // Listen on all available n
 
 // --- Start the Server ---
 const server = app.listen(PORT, HOST, () => {
+    logger.info(`Capsule backend server started on http://${HOST}:${PORT}`);
     console.log(`Capsule backend server running on http://${HOST}:${PORT}`);
     console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
 });
