@@ -101,9 +101,10 @@ EXPOSE 10000
 
 # Command to run the application
 # Assumes your backend's compiled entry point is dist/index.js
-CMD ["node", "dist/src/index.js"]
+# CMD ["node", "dist/src/index.js"]
+CMD ["sh", "-c", "echo '--- Contents of /app ---' && ls -l /app && echo '--- Contents of /app/dist ---' && ls -lR /app/dist && echo '--- Contents of /app/dist/src ---' && ls -l /app/dist/src && sleep infinity"]
 RUN echo "--- [PROD] Stage 3: Production Image Setup Complete ---"
 
 # Optional: Add a healthcheck
-# HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-#   CMD curl -f http://localhost:10000/api/health || exit 1
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:10000/api/health || exit 1
