@@ -82,14 +82,19 @@ RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 # We copy the whole dist, not just specific files from node_modules, because npm ci handled runtime deps
 RUN echo "--- [PROD] Copying built backend artifacts ---"
 COPY --from=backend-builder --chown=appuser:appgroup /app/backend/dist ./dist
-# If your backend needs templates or other static assets from src, copy them too
-# COPY --from=backend-builder --chown=appuser:appgroup /app/backend/src/templates ./dist/templates
+# Now /app/dist contains your backend build
 
-# Copy built frontend from frontend-builder stage
-RUN echo "--- [PROD] Copying built frontend artifacts ---"
-COPY --from=frontend-builder --chown=appuser:appgroup /app/frontend/dist ./frontend_build
+# Create the target directory for the frontend build *inside* the backend's dist directory
+# Ensure it's owned by the appuser
+RUN mkdir -p /app/dist/frontend_build && chown appuser:appgroup /app/dist/frontend_build
 
-# Create data directory and set permissions
+RUN echo "--- [PROD] Copying built frontend artifacts to /app/dist/frontend_build/ ---"
+# Copy contents of /app/frontend/dist (from builder) into /app/dist/frontend_build/ (in final image)
+# The trailing slashes are important:
+# Source: /app/frontend/dist/ (means "contents of this directory")
+# Destination: ./dist/frontend_build/ (means "into this directory", relative to WORKDIR /app)
+COPY --from=frontend-builder --chown=appuser:appgroup /app/frontend/dist/ ./dist/frontend_build/
+
 RUN echo "--- [PROD] Creating data directory ---"
 RUN mkdir -p /app/data && chown appuser:appgroup /app/data
 
@@ -102,7 +107,6 @@ EXPOSE 10000
 # Command to run the application
 # Assumes your backend's compiled entry point is dist/index.js
 CMD ["node", "dist/index.js"]
-# CMD ["sh", "-c", "echo '--- Contents of /app ---' && ls -l /app && echo '--- Contents of /app/dist ---' && ls -lR /app/dist && echo '--- Contents of /app/dist/src ---' && ls -l /app/dist/src && sleep infinity"]
 RUN echo "--- [PROD] Stage 3: Production Image Setup Complete ---"
 
 # Optional: Add a healthcheck
