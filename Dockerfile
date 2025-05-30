@@ -101,7 +101,7 @@ EXPOSE 10000
 
 # Command to run the application
 # Assumes your backend's compiled entry point is dist/index.js
-CMD ["node", "dist/index.js"]
+CMD ["node", "dist/src/index.js"]
 RUN echo "--- [PROD] Stage 3: Production Image Setup Complete ---"
 
 # Optional: Add a healthcheck
