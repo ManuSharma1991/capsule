@@ -48,7 +48,7 @@ RUN apt-get update && \
 RUN echo "--- [BACKEND] Copying package files ---"
 COPY backend/package.json backend/package-lock.json ./
 # If you have a drizzle.config.js/ts, copy it too
-COPY backend/drizzle.config.js ./ 
+COPY backend/drizzle.config.ts ./ 
 
 RUN echo "--- [BACKEND] Installing dependencies (npm ci) ---"
 RUN npm_config_loglevel=verbose npm ci --prefer-offline --no-audit # Keep verbose for now
