@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  capsule:
+    image: manuviswanadha/capule:latest # The image built by your Dockerfile
+    build:
+      context: .
+      args:
+        # TEMP_DB_FILE_NAME_ARG for build-time validation (optional)
+        TEMP_DB_FILE_NAME_ARG: "temporary.db"
+    ports:
+      - "10000:10000"
+    environment:
+      # DATABASE_FILE_PATH is used by docker-entrypoint.sh
+      - DATABASE_FILE_PATH=/app/data/production.db
+      # Add any other runtime environment variables your app needs
+      # - NODE_ENV=production # Already set in Dockerfile, but can be overridden
+    volumes:
+      - /portainer/Files/AppData/Config/Capsule/data:/app/data # Mounts the named volume to /app/data inside the container
+    restart: unless-stopped
+
+  myapp_data: # Defines a named volume managed by Docker

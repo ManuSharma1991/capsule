@@ -44,8 +44,8 @@ jobs:
             ${{ secrets.DOCKERHUB_USERNAME }}/capsule:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/capsule:${{ github.sha }}
           # Optional: Add build arguments
-          # build-args: |
-          #   ARG_NAME=value
+          build-args: |
+            PRODUCTION_DB_FILE_NAME_ARG='production.db'
           # Optional: Cache Docker layers to speed up builds
           cache-from: type=gha
           cache-to: type=gha,mode=max
