@@ -68,6 +68,9 @@ ENV NODE_ENV=production
 
 RUN echo "--- [PROD] Stage 3: Starting Production Image Setup ---"
 
+# Install curl for the HEALTHCHECK and any other OS-level dependencies
+RUN apk add --no-cache curl
+
 # Install runtime dependencies only (npm ci --omit=dev)
 # Need to copy package.json and package-lock.json first for this stage as well
 COPY backend/package.json backend/package-lock.json ./
