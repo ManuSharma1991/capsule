@@ -37,12 +37,20 @@ ENV NODE_ENV=development
 
 RUN echo "--- [BACKEND] Stage 2: Starting Backend Build ---"
 
+# Install build tools needed for native modules even in the builder if they are dev dependencies
+# or if you want to ensure they build correctly here.
+# However, the primary issue is in the production stage.
+# If you have native devDependencies, you'd add them here too.
+# RUN apk add --no-cache python3 make g++
+
 RUN echo "--- [BACKEND] Copying package files ---"
 COPY backend/package.json backend/package-lock.json ./
 # If using pnpm: COPY backend/pnpm-lock.yaml ./
 # If using yarn: COPY backend/yarn.lock ./
 
 RUN echo "--- [BACKEND] Installing dependencies (npm ci) ---"
+# If backend also has native modules that need building during dev dep install, add build tools here.
+# For now, assuming only runtime native modules matter for the error.
 RUN npm ci
 # If using pnpm: RUN corepack enable && pnpm install --frozen-lockfile
 # If using yarn: RUN yarn install --frozen-lockfile
@@ -69,14 +77,18 @@ ENV NODE_ENV=production
 RUN echo "--- [PROD] Stage 3: Starting Production Image Setup ---"
 
 # Install curl for the HEALTHCHECK and any other OS-level dependencies
-RUN apk add --no-cache curl
+# Also install build tools temporarily for native module compilation
+RUN apk add --no-cache curl python3 make g++
 
 # Install runtime dependencies only (npm ci --omit=dev)
 # Need to copy package.json and package-lock.json first for this stage as well
 COPY backend/package.json backend/package-lock.json ./
 RUN echo "--- [PROD] Installing backend runtime dependencies ---"
-RUN npm ci --omit=dev
+RUN npm ci --omit=dev --prefer-offline --no-audit --progress=false
 # If you had frontend runtime dependencies that weren't bundled (rare for Vite), handle similarly.
+
+# Remove build tools after dependencies are installed
+RUN apk del python3 make g++
 
 # Create a non-root user and group
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
@@ -92,17 +104,13 @@ COPY --from=backend-builder --chown=appuser:appgroup /app/backend/dist ./dist
 RUN mkdir -p /app/dist/frontend_build && chown appuser:appgroup /app/dist/frontend_build
 
 RUN echo "--- [PROD] Copying built frontend artifacts to /app/dist/frontend_build/ ---"
-# Copy contents of /app/frontend/dist (from builder) into /app/dist/frontend_build/ (in final image)
-# The trailing slashes are important:
-# Source: /app/frontend/dist/ (means "contents of this directory")
-# Destination: ./dist/frontend_build/ (means "into this directory", relative to WORKDIR /app)
 COPY --from=frontend-builder --chown=appuser:appgroup /app/frontend/dist/ ./dist/frontend_build/
 
 RUN echo "--- [PROD] Creating data directory ---"
 RUN mkdir -p /app/data && chown appuser:appgroup /app/data
 
 RUN echo "--- [PROD] Creating log directory ---"
-RUN mkdir -p /app/data && chown appuser:appgroup /app/logs
+RUN mkdir -p /app/logs && chown appuser:appgroup /app/logs # Corrected this line
 
 # Change to non-root user
 USER appuser
@@ -113,7 +121,7 @@ EXPOSE 10000
 # Command to run the application
 # Assumes your backend's compiled entry point is dist/index.js
 CMD ["node", "dist/index.js"]
-RUN echo "--- [PROD] Stage 3: Production Image Setup Complete ---"
+RUN echo "--- [PROD] Stage 3: Production Image Setup Complete ---" # This RUN echo won't execute at runtime, but during build
 
 # Optional: Add a healthcheck
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
