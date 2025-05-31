@@ -1,85 +1,89 @@
+// src/server.ts
 import express, { Express, Request, Response, NextFunction } from 'express';
 import path from 'path';
 import cors from 'cors';
-import morgan from 'morgan'; // HTTP request logger middleware
+import morgan from 'morgan';
+import dotenv from 'dotenv';
 
 import swaggerUi from 'swagger-ui-express';
 import swaggerJsdoc from 'swagger-jsdoc';
-import {swaggerOptions} from './swaggerConfig';
 
-// --- Import API Routers ---
-// Example: import dockerRoutes from './api/dockerRoutes';
-// Example: import appStoreRoutes from './api/appStoreRoutes';
-// Example: import settingsRoutes from './api/settingsRoutes';
+import { swaggerOptions } from './swaggerConfig';
+import { errorHandler } from './middleware/errorHandler';
+import caseRoutes from './api/cases/cases.routes';
+import authRoutes from './api/auth/auth.routes';
+import { authenticateToken } from './middleware/isAuthenticated';
 
-// --- Initialize Express App ---
+// --- Load Environment Variables ---
+dotenv.config();
+
+// --- Initialize App ---
 const app: Express = express();
+
+// --- Swagger Setup ---
 const swaggerSpec = swaggerJsdoc(swaggerOptions);
-
-
-// --- Middleware ---
-// Enable CORS - configure appropriately for your needs
-// For development, a simple setup is fine. For production, restrict origins.
-app.use(cors({
-    origin: process.env.NODE_ENV === 'production'
-        ? 'YOUR_PRODUCTION_FRONTEND_URL_OR_LEAVE_UNDEFINED_IF_SAME_ORIGIN' // e.g., https://capsule.yourdomain.com
-        : 'http://localhost:5173', // Assuming Vite dev server runs on 5173
-    credentials: true, // If you need to handle cookies/sessions
-}));
-
-// Body Parsers
-app.use(express.json()); // For parsing application/json
-app.use(express.urlencoded({ extended: true })); // For parsing application/x-www-form-urlencoded
-
-// HTTP Request Logging (Morgan)
-// 'dev' format is good for development. Consider 'combined' for production.
-app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
-
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-app.get('/api/health', async (req: Request, res: Response) => {
+// --- CORS ---
+app.use(cors({
+    origin: process.env.NODE_ENV === 'production'
+        ? process.env.PRODUCTION_FRONTEND_URL // replace or remove depending on deployment
+        : 'http://localhost:5173',
+    credentials: true,
+}));
+
+// --- Body Parsers ---
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// --- Logging ---
+app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
+
+// --- Health Check ---
+app.get('/api/health', (req: Request, res: Response) => {
     const dbPath = process.env.DATABASE_URL || path.join(__dirname, './db/database.sqlite');
-    res.status(200).json({ status: 'UP', message: `Capsule backend is healthy! and [Server] Connecting to SQLite database at: ${dbPath}` });
+    res.status(200).json({
+        status: 'UP',
+        message: `Capsule backend is healthy! Using DB at: ${dbPath}`
+    });
 });
 
-// --- Serve Frontend Static Files (Production Only) ---
-if (process.env.NODE_ENV === 'production') {
-    const frontendBuildPath = path.join(__dirname, '..', 'frontend_build'); // Adjust if your Dockerfile copies it elsewhere
+// --- API Routes ---
 
-    // Serve static files from the React app
+app.use('/api/auth', authRoutes); // Assuming auth.routes exports a router
+app.use('/api/cases', authenticateToken, caseRoutes);
+
+// --- Error Handler ---
+app.use(errorHandler); // Custom handler for known errors
+
+// --- Serve Frontend (Production Only) ---
+if (process.env.NODE_ENV === 'production') {
+    const frontendBuildPath = path.join(__dirname, '..', 'frontend_build');
     app.use(express.static(frontendBuildPath));
 
-    // The "catchall" handler: for any request that doesn't
-    // match one above, send back React's index.html file.
-    // This is important for client-side routing (React Router).
     app.get('*', (req: Request, res: Response) => {
         res.sendFile(path.join(frontendBuildPath, 'index.html'));
     });
 } else {
-    // Development specific message or redirect if frontend is served separately
     app.get('/', (req: Request, res: Response) => {
-        res.send('Capsule Backend (Development Mode). Frontend is likely running on a different port (e.g., 5173).');
+        res.send('Capsule Backend in Development. Frontend likely runs on another port.');
     });
 }
 
-// --- Error Handling Middleware (Basic Example) ---
-// This should be the last middleware added
+// --- Catch-All for Unhandled Errors ---
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-    console.error("Unhandled Error:", err.stack || err.message); // Log the error stack for debugging
+    console.error("Unhandled Error:", err.stack || err.message);
 
-    // Avoid sending detailed error messages to the client in production
-    const statusCode = (err as any).status || 500; // Use error status or default to 500
-    const message = process.env.NODE_ENV === 'production' && statusCode === 500
-        ? 'An unexpected error occurred on the server.'
-        : err.message || 'Internal Server Error';
+    const statusCode = (err as any).status || 500;
+    const isProd = process.env.NODE_ENV === 'production';
 
     res.status(statusCode).json({
         error: true,
-        message: message,
-        // Optionally include stack in development
-        ...(process.env.NODE_ENV !== 'production' && { stack: err.stack }),
+        message: isProd && statusCode === 500
+            ? 'An unexpected error occurred on the server.'
+            : err.message,
+        ...(isProd ? {} : { stack: err.stack }),
     });
 });
-
 
 export default app;

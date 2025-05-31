@@ -1,14 +1,11 @@
-// packages/backend/src/db/index.ts
-import { drizzle } from 'drizzle-orm/better-sqlite3';
-import Database from 'sqlite3';
-import * as mainSchemaCollection from './schema/main'; // Imports all exports from main/index.ts
-// import * as stagingSchemaCollection from './schema/staging'; // Imports all exports from staging/index.ts
-// import config from '../config'; // Your application config
+import { drizzle } from "drizzle-orm/better-sqlite3";
+import 'dotenv/config';
+import Database from "better-sqlite3";
+import * as prodSchema from "./schema/main/index";
+import * as stagingSchema from "./schema/staging/index";
 
-// For Main DB
-// const mainSqlite = new Database(config.db.mainPath);
-// export const dbMain = drizzle(mainSqlite, { schema: mainSchemaCollection, logger: config.env === 'development' });
+const prodDBFile = process.env.PRODUCTION_DB_FILE_NAME!;
+const stagingDBFile = process.env.STAGING_DB_FILE_NAME!;
 
-// For Staging DB
-// const stagingSqlite = new Database(config.db.stagingPath);
-// export const dbStaging = drizzle(stagingSqlite, { schema: stagingSchemaCollection, logger: config.env === 'development' });
+export const prodDb = drizzle(new Database(prodDBFile), { schema: prodSchema });
+export const stagingDb = drizzle(new Database(stagingDBFile), { schema: stagingSchema });

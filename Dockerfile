@@ -101,6 +101,9 @@ COPY --from=frontend-builder --chown=appuser:appgroup /app/frontend/dist/ ./dist
 RUN echo "--- [PROD] Creating data directory ---"
 RUN mkdir -p /app/data && chown appuser:appgroup /app/data
 
+RUN echo "--- [PROD] Creating log directory ---"
+RUN mkdir -p /app/data && chown appuser:appgroup /app/logs
+
 # Change to non-root user
 USER appuser
 

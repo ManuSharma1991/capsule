@@ -1,36 +1,48 @@
-import app from './server'; // Import the configured Express app
-import path from 'path';
-import fs from 'fs';
-import logger from './utils/logger'; // Import the logger utility
+import app from './server';
+import logger from './utils/logger';
+import { prodDb, stagingDb } from './db'; // Update this to wherever you defined your DBs
 
-// --- Configuration ---
 const PORT: number = parseInt(process.env.PORT || '10000', 10);
-const HOST: string = process.env.HOST || '0.0.0.0'; // Listen on all available network interfaces
+const HOST: string = process.env.HOST || '0.0.0.0';
 
-
-// --- Start the Server ---
 const server = app.listen(PORT, HOST, () => {
-    logger.info(`Capsule backend server started on http://${HOST}:${PORT}`);
-    console.log(`Capsule backend server running on http://${HOST}:${PORT}`);
-    console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+    logger.info(`✅ Capsule backend running at http://${HOST}:${PORT}`);
+    console.log(`✅ Capsule backend running at http://${HOST}:${PORT}`);
+    console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
 });
 
-// --- Graceful Shutdown ---
-const signals = ['SIGINT', 'SIGTERM', 'SIGQUIT'] as const;
+const shutdownSignals = ['SIGINT', 'SIGTERM', 'SIGQUIT'] as const;
 
-signals.forEach((signal) => {
+shutdownSignals.forEach((signal) => {
     process.on(signal, async () => {
-        console.log(`\nReceived ${signal}, shutting down gracefully...`);
+        console.log(`\n📦 Received ${signal}. Initiating graceful shutdown...`);
+
         server.close(async () => {
-            console.log('HTTP server closed.');
+            console.log('🛑 HTTP server closed.');
+
+            // --- Close DB connections ---
+            try {
+                if (prodDb) {
+                    await (prodDb as any).session?.client?.close?.(); // Optional chaining if client exists
+                    console.log('🔌 Closed production DB connection.');
+                }
+                if (stagingDb) {
+                    await (stagingDb as any).session?.client?.close?.();
+                    console.log('🔌 Closed staging DB connection.');
+                }
+            } catch (err) {
+                console.error('⚠️ Error during DB cleanup:', err);
+            }
+
+            process.exit(0);
         });
 
-        // Force shutdown if server hasn't closed in time
+        // Force shutdown if it takes too long
         setTimeout(() => {
-            console.error('Could not close connections in time, forcefully shutting down');
+            console.error('⏱️ Timeout: Could not close connections in time. Forcing shutdown.');
             process.exit(1);
-        }, 10000); // 10 seconds timeout
+        }, 10000);
     });
 });
 
-export default server; // Optional: export for testing purposes
+export default server;

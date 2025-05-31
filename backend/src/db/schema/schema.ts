@@ -4,7 +4,7 @@ import * as mainSchema from './main';
 
 export const schema = {
   ...mainSchema,
-//   ...stagingSchema,
+  //   ...stagingSchema,
   // ...any other schemas
 };
 
