@@ -1,31 +1,33 @@
 #!/bin/sh
-set -e # Exit immediately if a command exits with a non-zero status.
-
-# Drizzle config expects PRODUCTION_DB_FILE_NAME, but our persistent DB is at DATABASE_FILE_PATH
-# We will tell drizzle-kit to use the DATABASE_FILE_PATH by overriding the config
-# or by ensuring drizzle.config.ts can use DATABASE_FILE_PATH.
-
-# Modify drizzle.config.ts to prioritize DATABASE_FILE_PATH if present
-# This is a bit of a hack for build vs runtime. A better way is to have separate configs
-# or make the config more flexible.
-# For now, let's assume drizzle.config.ts will use PRODUCTION_DB_FILE_NAME
-# and we set that ENV var to point to our volume-mounted path.
+set -e
 
 export PRODUCTION_DB_FILE_NAME="${DATABASE_FILE_PATH}"
 
-echo "--- Entrypoint: Running Drizzle Migrations (drizzle-kit push) ---"
+echo "--- Entrypoint: Current user: $(whoami) ---"
+echo "--- Entrypoint: HOME directory: $HOME ---"
+echo "--- Entrypoint: NPM cache: $(npm config get cache) ---"
 echo "--- Database file target: $PRODUCTION_DB_FILE_NAME ---"
 
-# Ensure the directory for the SQLite file exists (it should if /app/data was created and mounted)
-mkdir -p "$(dirname "$PRODUCTION_DB_FILE_NAME")"
+DB_DIR=$(dirname "$PRODUCTION_DB_FILE_NAME")
 
-# Run drizzle-kit push
-# npx needs to be in the path, or use full path /app/node_modules/.bin/npx
-# Using `npm exec` is generally safer in scripts as it resolves from local node_modules
-npm exec -- drizzle-kit push # No 'npx' prefix needed with npm exec
+echo "--- Entrypoint: Checking permissions for $DB_DIR ---"
+ls -ld "$DB_DIR" || echo "Warning: Could not list $DB_DIR"
+echo "--- Entrypoint: Checking permissions for parent of $DB_DIR (/app) ---"
+ls -ld "$(dirname "$DB_DIR")" || echo "Warning: Could not list parent of $DB_DIR"
+
+echo "--- Entrypoint: Attempting to create directory $DB_DIR (if it doesn't exist) ---"
+mkdir -p "$DB_DIR"
+echo "--- Entrypoint: Directory $DB_DIR should now exist. Listing again: ---"
+ls -ld "$DB_DIR" || echo "Warning: Could not list $DB_DIR after mkdir -p"
+
+echo "--- Entrypoint: Attempting to touch a test file in $DB_DIR ---"
+touch "$DB_DIR/test_writable.txt" && echo "Successfully touched test_writable.txt" || echo "ERROR: Could not write to $DB_DIR"
+rm -f "$DB_DIR/test_writable.txt"
+
+echo "--- Entrypoint: Running Drizzle Migrations (drizzle-kit push) ---"
+npm exec -- drizzle-kit push
 
 echo "--- Entrypoint: Drizzle Migrations Complete ---"
 echo "--- Entrypoint: Starting Application ---"
 
-# Execute the CMD passed to the docker run command, or the Dockerfile's CMD
 exec "$@"
