@@ -2,32 +2,24 @@
 set -e
 
 export PRODUCTION_DB_FILE_NAME="${DATABASE_FILE_PATH}"
-
-echo "--- Entrypoint: Current user: $(whoami) ---"
-echo "--- Entrypoint: HOME directory: $HOME ---"
-echo "--- Entrypoint: NPM cache: $(npm config get cache) ---"
-echo "--- Database file target: $PRODUCTION_DB_FILE_NAME ---"
-
 DB_DIR=$(dirname "$PRODUCTION_DB_FILE_NAME")
 
-echo "--- Entrypoint: Checking permissions for $DB_DIR ---"
-ls -ld "$DB_DIR" || echo "Warning: Could not list $DB_DIR"
-echo "--- Entrypoint: Checking permissions for parent of $DB_DIR (/app) ---"
-ls -ld "$(dirname "$DB_DIR")" || echo "Warning: Could not list parent of $DB_DIR"
+echo "--- Entrypoint (running as $(whoami) UID: $(id -u) GID: $(id -g)) ---"
+echo "--- Database file target for Drizzle: $PRODUCTION_DB_FILE_NAME ---"
+echo "--- Directory $DB_DIR permissions on entry: ---"
+ls -ld "$DB_DIR" # Should now show ownership mapping to appuser
 
-echo "--- Entrypoint: Attempting to create directory $DB_DIR (if it doesn't exist) ---"
-mkdir -p "$DB_DIR"
-echo "--- Entrypoint: Directory $DB_DIR should now exist. Listing again: ---"
-ls -ld "$DB_DIR" || echo "Warning: Could not list $DB_DIR after mkdir -p"
+echo "--- Attempting to touch a test file in $DB_DIR (as $(whoami)) ---"
+touch "$DB_DIR/test_writable_as_appuser.txt" && echo "Successfully touched test_writable_as_appuser.txt" || echo "ERROR: Could not write to $DB_DIR"
+if [ -f "$DB_DIR/test_writable_as_appuser.txt" ]; then
+    rm -f "$DB_DIR/test_writable_as_appuser.txt"
+fi
 
-echo "--- Entrypoint: Attempting to touch a test file in $DB_DIR ---"
-touch "$DB_DIR/test_writable.txt" && echo "Successfully touched test_writable.txt" || echo "ERROR: Could not write to $DB_DIR"
-rm -f "$DB_DIR/test_writable.txt"
+mkdir -p "$DB_DIR" # Should succeed now
 
-echo "--- Entrypoint: Running Drizzle Migrations (drizzle-kit push) ---"
+echo "--- Running Drizzle Migrations (drizzle-kit push) ---"
 npm exec -- drizzle-kit push
 
-echo "--- Entrypoint: Drizzle Migrations Complete ---"
-echo "--- Entrypoint: Starting Application ---"
-
+echo "--- Drizzle Migrations Complete ---"
+echo "--- Starting Application: $@ ---"
 exec "$@"
