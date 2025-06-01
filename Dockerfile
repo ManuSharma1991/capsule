@@ -93,7 +93,7 @@ RUN mkdir -p /app/data \
 
 COPY --from=backend-builder --chown=appuser:appgroup /app/backend/dist ./dist
 COPY --from=backend-builder --chown=appuser:appgroup /app/backend/drizzle.config.ts ./drizzle.config.ts
-RUN sed -i "s|'./src/db/schema/main/index.ts'|'./dist/db/schema/main/index.js'|g" /app/drizzle.config.ts
+RUN sed -i "s|'./src/db/schema/main/index.ts'|'./dist/src/db/schema/main/index.js'|g" /app/drizzle.config.ts
 
 COPY --from=frontend-builder --chown=appuser:appgroup /app/frontend/dist/ ./dist/frontend_build/
 
