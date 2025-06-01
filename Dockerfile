@@ -82,7 +82,7 @@ RUN apt-get purge -y --auto-remove python3 python3-dev build-essential && \
 # Create a non-root user and group (Debian-style)
 # Set HOME directory for the user and ensure it's created
 RUN addgroup --system appgroup && \
-    adduser --system --ingroup appgroup --home /home/appuser --create-home appuser
+    adduser --system --ingroup appgroup --home /home/appuser appuser
 
 # Create app-specific directories and npm cache/global directories and chown them BEFORE switching user
 RUN mkdir -p /app/data \
