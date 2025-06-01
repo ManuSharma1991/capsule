@@ -53,71 +53,59 @@ RUN echo "--- [BACKEND] Stage 2: Backend Build Complete ---"
 FROM node:24-bookworm
 WORKDIR /app
 ENV NODE_ENV=production
-# This will be the *actual* path to the database file inside the container,
-# which will be backed by a Docker Volume.
-ENV DATABASE_FILE_PATH="/app/data/production.db"
+ENV DATABASE_FILE_PATH="/app/data/production.db" 
+# ---- NPM Configuration for non-root user ----
+ENV NPM_CONFIG_CACHE="/app/.npm-cache" 
+ENV NPM_CONFIG_PREFIX="/app/.npm-global" 
+ENV PATH="/app/.npm-global/bin:${PATH}" 
 
 RUN echo "--- [PROD] Stage 3: Starting Production Image Setup ---"
 
-# Install Drizzle Kit and any other runtime tools needed for migrations at startup
-# Also install build tools if any runtime dependencies (like better-sqlite3) need them.
 RUN apt-get update && \
     apt-get install -y --no-install-recommends python3 python3-dev build-essential curl && \
     rm -rf /var/lib/apt/lists/*
 
-# Copy package.json and package-lock.json to install production deps + drizzle-kit
 COPY backend/package.json backend/package-lock.json ./
-# We need drizzle-kit and its dependencies at runtime for the entrypoint script.
-# So, install all dependencies that are not devDependencies, plus ensure drizzle-kit is there.
-# If drizzle-kit is a devDependency, you might need to install it explicitly or ensure
-# your `npm ci --omit=dev` still gets what's needed if you are not using `npm prune`.
-# For simplicity, let's assume drizzle-kit will be available from a full `npm ci` if we are not careful
-# A safer bet is to ensure `drizzle-kit` and `drizzle-orm` are in `dependencies` not `devDependencies`
-# if you intend to use them at runtime like this.
-# OR, copy node_modules from builder (as discussed before) and then add drizzle-kit if missing.
 
 # Option 1: Copy node_modules and prune (simpler for consistent dependencies)
 COPY --from=backend-builder /app/backend/node_modules ./node_modules
 RUN npm prune --production --prefer-offline --no-audit --progress=false
-# If drizzle-kit was a devDep and got pruned, install it now:
-# RUN npm install drizzle-kit drizzle-orm # Add any other ORM packages
-
-# Option 2: Fresh install of production deps (might recompile native modules)
-# RUN npm ci --omit=dev --prefer-offline --no-audit --progress=false
-# RUN npm install drizzle-kit # Ensure drizzle-kit is present for runtime migrations
-
-# We need the build tools for better-sqlite3 if using Option 2, or if prune/copy doesn't get it right.
-# (They are already installed above for this stage)
+# If drizzle-kit was a devDep and got pruned, install it now into the local node_modules:
+# This ensures it's available for `npm exec` without relying on global installs or npm fetching metadata.
+# RUN npm install drizzle-kit # Ensure it's in dependencies in package.json to avoid this
 
 # After dependencies are set up:
 RUN apt-get purge -y --auto-remove python3 python3-dev build-essential && \
     apt-get autoremove -y && \
     rm -rf /var/lib/apt/lists/*
 
+# Create a non-root user and group (Debian-style)
+# Set HOME directory for the user and ensure it's created
+RUN addgroup --system appgroup && \
+    adduser --system --ingroup appgroup --home /home/appuser --create-home appuser
 
-RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
+# Create app-specific directories and npm cache/global directories and chown them BEFORE switching user
+RUN mkdir -p /app/data \
+    /app/logs \
+    /app/.npm-cache \
+    /app/.npm-global \
+    && chown -R appuser:appgroup /app
 
 COPY --from=backend-builder --chown=appuser:appgroup /app/backend/dist ./dist
 COPY --from=backend-builder --chown=appuser:appgroup /app/backend/drizzle.config.ts ./drizzle.config.ts
-# If you generated SQL migrations, copy them too:
-# COPY --from=backend-builder --chown=appuser:appgroup /app/backend/drizzle ./drizzle
 
 COPY --from=frontend-builder --chown=appuser:appgroup /app/frontend/dist/ ./dist/frontend_build/
 
-# Create the data directory where the volume will be mounted
-RUN mkdir -p /app/data && chown appuser:appgroup /app/data
-RUN mkdir -p /app/logs && chown appuser:appgroup /app/logs
-
-# Copy the entrypoint script
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
+# Change to non-root user
 USER appuser
-EXPOSE 10000
+# ---- Set HOME for the appuser ----
+ENV HOME="/home/appuser" 
 
-# The entrypoint script will handle migrations and then run the app
+EXPOSE 10000
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
-# CMD is now part of the entrypoint script, but you can provide a default here if needed
 CMD ["node", "dist/index.js"]
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
