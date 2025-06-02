@@ -37,13 +37,13 @@ axiosInstance.interceptors.response.use(
     (error) => {
         console.error('Response Error Interceptor:', error.response?.data || error.message);
         // Handle global errors like 401 (Unauthorized), 403 (Forbidden)
-        // if (error.response) {
-        //   const { status } = error.response;
-        //   if (status === 401) {
-        //     // e.g., redirect to login, clear token
-        //     // window.location.href = '/login';
-        //   }
-        // }
+        if (error.response) {
+            const { status } = error.response;
+            if (status === 401) {
+                // e.g., redirect to login, clear token
+                // window.location.href = '/login';
+            }
+        }
         return Promise.reject(error); // Important to reject the promise so .catch() blocks work
     }
 );
