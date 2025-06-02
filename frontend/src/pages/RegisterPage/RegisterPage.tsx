@@ -10,7 +10,11 @@ import {
     Paper,
     Avatar,
     CircularProgress,
+    InputAdornment,
+    IconButton,
 } from '@mui/material';
+import VisibilityOffRoundedIcon from '@mui/icons-material/VisibilityOffRounded';
+import VisibilityRoundedIcon from '@mui/icons-material/VisibilityRounded';
 import PersonAddOutlinedIcon from '@mui/icons-material/PersonAddOutlined';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
@@ -57,7 +61,14 @@ const RegisterPage = () => {
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(false);
     const [serverError, setServerError] = useState<string | null>(null); // For displaying server-side errors
+    const [showRetypePassword, setShowRetypePassword] = useState(false);
     const dispatch = useDispatch<AppDispatch>();
+
+    const handleClickShowRetypePassword = () => setShowRetypePassword((show) => !show);
+
+    const handleMouseDownRetypePassword = (event: React.MouseEvent<HTMLButtonElement>) => {
+        event.preventDefault();
+    };
 
     const {
         control,
@@ -234,9 +245,24 @@ const RegisterPage = () => {
                                 fullWidth
                                 name="retypePassword"
                                 label="Retype Password"
-                                type="password"
+                                type={showRetypePassword ? 'text' : 'password'}
                                 id="retypePassword"
                                 autoComplete="new-password"
+                                InputProps={{
+                            endAdornment: (
+                                <InputAdornment position="end">
+                                    <IconButton
+                                        aria-label="toggle password visibility"
+                                        onClick={handleClickShowRetypePassword}
+                                        onMouseDown={handleMouseDownRetypePassword}
+                                        edge="end" // Helps with spacing
+                                    >
+                                        {/* Show the correct icon based on the state */}
+                                        {showRetypePassword ? <VisibilityRoundedIcon /> : <VisibilityOffRoundedIcon  />}
+                                    </IconButton>
+                                </InputAdornment>
+                            ),
+                        }}
                                 error={!!errors.retypePassword}
                                 helperText={errors.retypePassword?.message}
                                 disabled={isLoading || isSubmitting}

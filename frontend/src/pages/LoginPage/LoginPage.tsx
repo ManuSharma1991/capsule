@@ -10,8 +10,12 @@ import {
     Paper,
     Avatar,
     CircularProgress,
+    IconButton,
+    InputAdornment,
 } from '@mui/material';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import VisibilityOffRoundedIcon from '@mui/icons-material/VisibilityOffRounded';
+import VisibilityRoundedIcon from '@mui/icons-material/VisibilityRounded';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { styled } from '@mui/material/styles'; // Import styled
@@ -54,7 +58,14 @@ const LoginPage = () => {
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(false);
     const [serverError, setServerError] = useState<string | null>(null);
+    const [showPassword, setShowPassword] = useState(false);
     const dispatch = useDispatch<AppDispatch>();
+
+    const handleClickShowRetypePassword = () => setShowPassword((show) => !show);
+
+    const handleMouseDownRetypePassword = (event: React.MouseEvent<HTMLButtonElement>) => {
+        event.preventDefault();
+    };
 
     const {
         control,
@@ -85,7 +96,7 @@ const LoginPage = () => {
                 token: response.data.token, // Adjust based on your actual response structure
             }));
             dispatch(showSnackBar({ message: "Login Successful", severity: 'success', dismissDuration: 3000 }));
-            navigate('/home'); // Or desired page after login, e.g., '/dashboard'
+            navigate('/dashboard'); // Or desired page after login, e.g., '/dashboard'
         } catch (error) { // It's good to type error if possible, e.g., AxiosError
             console.error('Login failed:', error);
             dispatch(showSnackBar({ message: "error", severity: 'error', dismissDuration: 5000 }));
@@ -144,9 +155,24 @@ const LoginPage = () => {
                                 fullWidth
                                 name="password"
                                 label="Password"
-                                type="password"
+                                type={showPassword ? 'text' : 'password'}
                                 id="password"
                                 autoComplete="current-password"
+                                InputProps={{
+                            endAdornment: (
+                                <InputAdornment position="end">
+                                    <IconButton
+                                        aria-label="toggle password visibility"
+                                        onClick={handleClickShowRetypePassword}
+                                        onMouseDown={handleMouseDownRetypePassword}
+                                        edge="end" // Helps with spacing
+                                    >
+                                        {/* Show the correct icon based on the state */}
+                                        {showPassword ? <VisibilityRoundedIcon /> : <VisibilityOffRoundedIcon  />}
+                                    </IconButton>
+                                </InputAdornment>
+                            ),
+                        }}
                                 error={!!errors.password}
                                 helperText={errors.password?.message}
                                 disabled={isLoading || isSubmitting}
