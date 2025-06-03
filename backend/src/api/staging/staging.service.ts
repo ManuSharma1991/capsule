@@ -1,6 +1,7 @@
 import { stagingDb } from '../../db';
 import { CaseTable, caseTable, hearingsTable, HearingTable } from '../../db/schema/staging';
 import { ImportCauseListData } from '../import/import.validation';
+import { convertToYYYYMMDD } from '../../utils/helpers';
 
 export const createCase = async (data: ImportCauseListData) => {
   // generate case_no from case_type, s_no, place_of_filing, year_of_filing
@@ -28,32 +29,37 @@ export const createCase = async (data: ImportCauseListData) => {
   }
 
   const firstHearing: HearingTable = {
-    hearing_date: data.hearing_date,
+    hearing_date: convertToYYYYMMDD(data.hearing_date)!,
     case_no: case_no,
     remarks: data.remarks,
   };
 
   try {
-    await stagingDb.transaction(async (tx) => {
-      await tx.insert(caseTable).values(newCase);
-      await tx.insert(hearingsTable).values(firstHearing);
+    stagingDb.transaction((tx) => {
+
+      tx.insert(caseTable)
+        .values(newCase)
+        .onConflictDoUpdate({ target: caseTable.case_no, set: newCase })
+        .run();
+
+      tx.insert(hearingsTable).values(firstHearing).run();
+
       if (data.next_hearing_date) {
         const nextHearingEntry: HearingTable = {
           case_no: case_no,
-          hearing_date: data.next_hearing_date,
+          hearing_date: convertToYYYYMMDD(data.next_hearing_date)!,
         };
-        await tx.insert(hearingsTable).values(nextHearingEntry);
+        tx.insert(hearingsTable).values(nextHearingEntry).run();
       }
     });
 
-    return { message: 'Case added successfully', case_no };
   } catch (error) {
     console.error('Failed to create case and hearings:', error);
     // Re-throw or handle as appropriate for your error handling strategy
     // For example, you might want to return a specific error response
-    throw new Error(
-      `Failed to add case: ${error instanceof Error ? error.message : String(error)}`
-    );
+    // throw new Error(
+    //   `Failed to add case: ${error instanceof Error ? error.message : String(error)}`
+    // );
     // Or return { success: false, error: "Database operation failed" }
   }
 };

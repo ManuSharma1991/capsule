@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const importCauseListDataSchema = z.object({
-  case_type: z.enum(['ITA', 'MA', 'SA']),
+  case_type: z.enum(['ITA', 'MA', 'SA', 'CO']),
   s_no: z.number().int().positive(),
   place_of_filing: z.string().length(3).optional().default('NAG'),
   year_of_filing: z.number().min(1950).max(2100),
@@ -9,7 +9,7 @@ export const importCauseListDataSchema = z.object({
   bench_type: z.enum(['DB', 'SMC']),
   assessee_name: z.string().min(1),
   assessment_year: z.string(),
-  assessed_section: z.union([z.string().optional(), z.number().int().optional()]),
+  assessed_section: z.union([z.string().optional(), z.number().optional()]),
   disputed_amount: z.number().nonnegative(),
   argued_by: z.enum(['CIT (DR)', 'Sr. DR']),
   remarks: z.string().optional(),

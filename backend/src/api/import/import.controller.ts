@@ -9,7 +9,6 @@ export const importCases = async (req: Request, res: Response) => {
     logger.error('Validation failed for case payload:', validation.error);
     return res.status(400).json({ error: validation.error });
   } else {
-    console.log('Validation successful for case payload:', validation.data);
     const result = validation.data && (await importService.importCases(validation.data));
     return res.status(201).json(result);
   }

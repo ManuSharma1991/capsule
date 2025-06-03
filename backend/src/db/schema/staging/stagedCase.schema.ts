@@ -1,8 +1,7 @@
-import { sql } from 'drizzle-orm';
 import { int, real, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 
 export const caseTable = sqliteTable('case_table', {
-  case_type: text('case_type', { enum: ['ITA', 'MA', 'SA'] }),
+  case_type: text('case_type', { enum: ['ITA', 'MA', 'SA', 'CO'] }),
   s_no: int('s_no'),
   place_of_filing: text('place_of_filing').default('NAG'),
   year_of_filing: int('year_of_filing'),
@@ -24,10 +23,6 @@ export const caseTable = sqliteTable('case_table', {
   notes: text('notes'),
   is_detail_present: int('is_detail_present').default(0),
   needs_review: int('needs_review').default(0),
-  created_at: int('created_at', { mode: 'timestamp' }).default(sql`(strftime('%s', 'now'))`),
-  updated_at: int('updated_at', { mode: 'timestamp' })
-    .default(sql`(strftime('%s', 'now'))`)
-    .$onUpdate(() => sql`(strftime('%s', 'now'))`),
 });
 
 export type CaseTable = typeof caseTable.$inferInsert;
