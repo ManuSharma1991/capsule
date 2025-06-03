@@ -184,9 +184,7 @@
       "indexes": {
         "case_table_case_no_unique": {
           "name": "case_table_case_no_unique",
-          "columns": [
-            "case_no"
-          ],
+          "columns": ["case_no"],
           "isUnique": true
         }
       },
@@ -249,12 +247,8 @@
           "name": "hearings_case_no_case_table_case_no_fk",
           "tableFrom": "hearings",
           "tableTo": "case_table",
-          "columnsFrom": [
-            "case_no"
-          ],
-          "columnsTo": [
-            "case_no"
-          ],
+          "columnsFrom": ["case_no"],
+          "columnsTo": ["case_no"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -305,16 +299,12 @@
       "indexes": {
         "users_table_empId_unique": {
           "name": "users_table_empId_unique",
-          "columns": [
-            "empId"
-          ],
+          "columns": ["empId"],
           "isUnique": true
         },
         "users_table_email_unique": {
           "name": "users_table_email_unique",
-          "columns": [
-            "email"
-          ],
+          "columns": ["email"],
           "isUnique": true
         }
       },

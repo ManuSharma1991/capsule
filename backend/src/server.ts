@@ -26,12 +26,15 @@ const swaggerSpec = swaggerJsdoc(swaggerOptions);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // --- CORS ---
-app.use(cors({
-    origin: process.env.NODE_ENV === 'production'
+app.use(
+  cors({
+    origin:
+      process.env.NODE_ENV === 'production'
         ? process.env.PRODUCTION_FRONTEND_URL // replace or remove depending on deployment
         : 'http://localhost:5173',
     credentials: true,
-}));
+  })
+);
 
 // --- Body Parsers ---
 app.use(express.json());
@@ -42,11 +45,11 @@ app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 
 // --- Health Check ---
 app.get('/api/health', (req: Request, res: Response) => {
-    const dbPath = process.env.DATABASE_URL || path.join(__dirname, './db/database.sqlite');
-    res.status(200).json({
-        status: 'UP',
-        message: `Capsule backend is healthy! Using DB at: ${dbPath}`
-    });
+  const dbPath = process.env.DATABASE_URL || path.join(__dirname, './db/database.sqlite');
+  res.status(200).json({
+    status: 'UP',
+    message: `Capsule backend is healthy! Using DB at: ${dbPath}`,
+  });
 });
 
 // --- API Routes ---
@@ -60,32 +63,31 @@ app.use(errorHandler); // Custom handler for known errors
 
 // --- Serve Frontend (Production Only) ---
 if (process.env.NODE_ENV === 'production') {
-    const frontendBuildPath = path.join(__dirname, '..', 'frontend_build');
-    app.use(express.static(frontendBuildPath));
+  const frontendBuildPath = path.join(__dirname, '..', 'frontend_build');
+  app.use(express.static(frontendBuildPath));
 
-    app.get('*', (req: Request, res: Response) => {
-        res.sendFile(path.join(frontendBuildPath, 'index.html'));
-    });
+  app.get('*', (req: Request, res: Response) => {
+    res.sendFile(path.join(frontendBuildPath, 'index.html'));
+  });
 } else {
-    app.get('/', (req: Request, res: Response) => {
-        res.send('Capsule Backend in Development. Frontend likely runs on another port.');
-    });
+  app.get('/', (req: Request, res: Response) => {
+    res.send('Capsule Backend in Development. Frontend likely runs on another port.');
+  });
 }
 
 // --- Catch-All for Unhandled Errors ---
-app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-    console.error("Unhandled Error:", err.stack || err.message);
+app.use((err: Error, req: Request, res: Response) => {
+  console.error('Unhandled Error:', err.stack || err.message);
 
-    const statusCode = (err as any).status || 500;
-    const isProd = process.env.NODE_ENV === 'production';
+  const statusCode = (err as any).status || 500;
+  const isProd = process.env.NODE_ENV === 'production';
 
-    res.status(statusCode).json({
-        error: true,
-        message: isProd && statusCode === 500
-            ? 'An unexpected error occurred on the server.'
-            : err.message,
-        ...(isProd ? {} : { stack: err.stack }),
-    });
+  res.status(statusCode).json({
+    error: true,
+    message:
+      isProd && statusCode === 500 ? 'An unexpected error occurred on the server.' : err.message,
+    ...(isProd ? {} : { stack: err.stack }),
+  });
 });
 
 export default app;

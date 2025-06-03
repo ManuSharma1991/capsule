@@ -1,17 +1,15 @@
-import logger from "../../utils/logger";
-import { prodDb } from "../../db";
-import { caseTable } from "../../db/schema/main";
-import { eq } from "drizzle-orm";
+import { prodDb } from '../../db';
+import { caseTable } from '../../db/schema/main';
 
 export const createCase = async (data: any) => {
-    // generate case_no from case_type, s_no, place_of_filing, year_of_filing
-    const case_no = `${data.case_type} ${data.s_no}/${data.place_of_filing}/${data.year_of_filing}`;
-    const newCase = { ...data, case_no };
+  // generate case_no from case_type, s_no, place_of_filing, year_of_filing
+  const case_no = `${data.case_type} ${data.s_no}/${data.place_of_filing}/${data.year_of_filing}`;
+  const newCase = { ...data, case_no };
 
-    await prodDb.insert(caseTable).values(newCase);
-    return { message: "Case added", case_no };
+  await prodDb.insert(caseTable).values(newCase);
+  return { message: 'Case added', case_no };
 };
 
 export const fetchCases = async () => {
-    return await prodDb.select().from(caseTable);
+  return await prodDb.select().from(caseTable);
 };
