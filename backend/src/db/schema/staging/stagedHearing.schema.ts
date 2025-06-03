@@ -1,6 +1,7 @@
 import { sql } from 'drizzle-orm';
 import { int, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 import { caseTable } from './stagedCase.schema';
+import { createSelectSchema } from 'drizzle-zod';
 
 export const hearingsTable = sqliteTable('hearings', {
   id: integer('id').primaryKey({ autoIncrement: true }), // Unique ID for the hearing
@@ -17,3 +18,8 @@ export const hearingsTable = sqliteTable('hearings', {
     .$onUpdate(() => sql`(strftime('%s', 'now'))`)
     .notNull(),
 });
+
+
+export type HearingTable = typeof hearingsTable.$inferInsert;
+export const selectStagedHearingSchema = createSelectSchema(hearingsTable);
+
