@@ -13,6 +13,7 @@ import { errorHandler } from './middleware/errorHandler';
 import caseRoutes from './api/cases/cases.routes';
 import authRoutes from './api/auth/auth.routes';
 import { authenticateToken } from './middleware/isAuthenticated';
+import importRoutes from './api/import/import.routes';
 
 // --- Load Environment Variables ---
 dotenv.config();
@@ -52,6 +53,7 @@ app.get('/api/health', (req: Request, res: Response) => {
 
 app.use('/api/auth', authRoutes); // Assuming auth.routes exports a router
 app.use('/api/cases', authenticateToken, caseRoutes);
+app.use('/api/import', importRoutes)
 
 // --- Error Handler ---
 app.use(errorHandler); // Custom handler for known errors

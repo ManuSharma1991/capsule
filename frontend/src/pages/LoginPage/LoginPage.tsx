@@ -159,20 +159,20 @@ const LoginPage = () => {
                                 id="password"
                                 autoComplete="current-password"
                                 InputProps={{
-                            endAdornment: (
-                                <InputAdornment position="end">
-                                    <IconButton
-                                        aria-label="toggle password visibility"
-                                        onClick={handleClickShowRetypePassword}
-                                        onMouseDown={handleMouseDownRetypePassword}
-                                        edge="end" // Helps with spacing
-                                    >
-                                        {/* Show the correct icon based on the state */}
-                                        {showPassword ? <VisibilityRoundedIcon /> : <VisibilityOffRoundedIcon  />}
-                                    </IconButton>
-                                </InputAdornment>
-                            ),
-                        }}
+                                    endAdornment: (
+                                        <InputAdornment position="end">
+                                            <IconButton
+                                                aria-label="toggle password visibility"
+                                                onClick={handleClickShowRetypePassword}
+                                                onMouseDown={handleMouseDownRetypePassword}
+                                                edge="end" // Helps with spacing
+                                            >
+                                                {/* Show the correct icon based on the state */}
+                                                {showPassword ? <VisibilityRoundedIcon /> : <VisibilityOffRoundedIcon />}
+                                            </IconButton>
+                                        </InputAdornment>
+                                    ),
+                                }}
                                 error={!!errors.password}
                                 helperText={errors.password?.message}
                                 disabled={isLoading || isSubmitting}
