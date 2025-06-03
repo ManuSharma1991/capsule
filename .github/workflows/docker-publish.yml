@@ -11,7 +11,38 @@ on:
     branches: ["master"] # Optionally build (but not push) on PRs to main
 
 jobs:
+  lint-and-format:
+    name: Lint and Format Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install client dependencies
+        working-directory: client
+        run: npm ci
+
+      - name: Install server dependencies
+        working-directory: server
+        run: npm ci
+
+      - name: Run ESLint (client)
+        working-directory: client
+        run: npm run lint
+
+      - name: Run ESLint (server)
+        working-directory: server
+        run: npm run lint
+
+      - name: Run Prettier check
+        run: npx prettier --check .
   build-and-push-image:
+    needs: lint-and-format # Ensure linting is done before building the image
     runs-on: ubuntu-latest # Use the latest Ubuntu runner
 
     steps:
