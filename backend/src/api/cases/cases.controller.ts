@@ -1,9 +1,9 @@
-import { NextFunction, Request, Response } from "express";
+import { Request, Response } from "express";
 import * as caseService from "./cases.service";
 import { validateCasePayload } from "./cases.validation";
 import logger from "../../utils/logger";
 
-export const addCase = async (req: Request, res: Response, next: NextFunction) => {
+export const addCase = async (req: Request, res: Response) => {
     const validation = validateCasePayload(req.body);
     if (!validation.success) {
         logger.error("Validation failed for case payload:", validation.error);

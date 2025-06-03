@@ -1,6 +1,5 @@
 import 'dotenv/config';
 import { defineConfig } from 'drizzle-kit';
-import logger from './src/utils/logger';
 
 export default defineConfig({
   out: './drizzle',

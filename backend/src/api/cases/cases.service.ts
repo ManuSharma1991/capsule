@@ -1,7 +1,5 @@
-import logger from "../../utils/logger";
 import { prodDb } from "../../db";
 import { caseTable } from "../../db/schema/main";
-import { eq } from "drizzle-orm";
 
 export const createCase = async (data: any) => {
     // generate case_no from case_type, s_no, place_of_filing, year_of_filing

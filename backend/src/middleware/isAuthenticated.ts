@@ -24,7 +24,8 @@ export const authenticateToken = (req: Request, res: Response, next: NextFunctio
         // Attach user info to request object for later use in handlers
         (req as any).user = decoded;
         next();
-    } catch (err) {
+    } catch (error) {
+        logger.error('Token verification failed:', error);
         return res.status(403).json({ error: 'Invalid or expired token' });
     }
 };

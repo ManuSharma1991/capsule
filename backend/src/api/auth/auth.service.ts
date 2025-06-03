@@ -40,7 +40,7 @@ export const loginUser = async (input: LoginInput) => {
     const user = await prodDb.select().from(usersTable).where(eq(usersTable.empId, input.empId));
     if (user.length === 0) throw new Error('Invalid employee ID or password');
 
-    const match = await bcrypt.compare(input.password, (user[0] as any).password);
+    const match = await bcrypt.compare(input.password, (user[0]).password);
     if (!match) throw new Error('Invalid employee ID or password');
 
     const token = jwt.sign({ userId: user[0].id }, JWT_SECRET, { expiresIn: '1h' });

@@ -71,7 +71,7 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 // --- Catch-All for Unhandled Errors ---
-app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+app.use((err: Error, req: Request, res: Response) => {
     console.error("Unhandled Error:", err.stack || err.message);
 
     const statusCode = (err as any).status || 500;

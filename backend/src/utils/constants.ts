@@ -41,4 +41,5 @@ export const AUTH_ERROR_MESSAGES: Record<string, string> = {
 export const GENERAL_ERROR_MESSAGES = {
     UNEXPECTED: "An unexpected error occurred. Please try again.",
     FORM_VALIDATION: "Please correct the highlighted errors.",
+    DB_UNIQUE_CONSTRAINT_VIOLATION: "A unique value constraint was violated."
 };
