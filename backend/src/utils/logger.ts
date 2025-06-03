@@ -1,12 +1,11 @@
 import winston from 'winston';
 
-
-const logger = new (winston.Logger)({
-    level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
-    transports: [
-        new (winston.transports.Console)(),
-        // new (winston.transports.File)({ filename: 'backend.log' })
-    ]
+const logger = new winston.Logger({
+  level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
+  transports: [
+    new winston.transports.Console(),
+    // new (winston.transports.File)({ filename: 'backend.log' })
+  ],
 });
 
 export default logger;

@@ -15,14 +15,15 @@ export const swaggerOptions = {
       // Add other servers like staging, production here later
     ],
     components: {
-        securitySchemes: { // Define security schemes (e.g., JWT) if you plan to use them
-            bearerAuth: {
-                type: 'http',
-                scheme: 'bearer',
-                bearerFormat: 'JWT',
-            }
-        }
-    }
+      securitySchemes: {
+        // Define security schemes (e.g., JWT) if you plan to use them
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
+        },
+      },
+    },
   },
   // Paths to files containing OpenAPI definitions (JSDoc comments)
   apis: [
