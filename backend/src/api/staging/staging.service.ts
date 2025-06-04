@@ -55,12 +55,6 @@ export const createCase = async (data: ImportCauseListData) => {
 
   } catch (error) {
     console.error('Failed to create case and hearings:', error);
-    // Re-throw or handle as appropriate for your error handling strategy
-    // For example, you might want to return a specific error response
-    // throw new Error(
-    //   `Failed to add case: ${error instanceof Error ? error.message : String(error)}`
-    // );
-    // Or return { success: false, error: "Database operation failed" }
   }
 };
 

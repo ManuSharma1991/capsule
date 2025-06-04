@@ -1,4 +1,3 @@
-import { sql } from 'drizzle-orm';
 import { int, real, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 
 export const caseTable = sqliteTable('case_table', {
@@ -75,11 +74,4 @@ export const caseTable = sqliteTable('case_table', {
   notes: text('notes'),
   is_detail_present: int('is_detail_present').default(0).notNull(),
   needs_review: int('needs_review').default(0).notNull(),
-  created_at: int('created_at', { mode: 'timestamp' })
-    .default(sql`(strftime('%s', 'now'))`)
-    .notNull(),
-  updated_at: int('updated_at', { mode: 'timestamp' })
-    .default(sql`(strftime('%s', 'now'))`)
-    .$onUpdate(() => sql`(strftime('%s', 'now'))`)
-    .notNull(),
 });

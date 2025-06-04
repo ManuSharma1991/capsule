@@ -1,5 +1,4 @@
-import { sql } from 'drizzle-orm';
-import { int, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
+import { integer, sqliteTable, text, unique } from 'drizzle-orm/sqlite-core';
 import { caseTable } from './case.schema';
 
 export const hearingsTable = sqliteTable('hearings', {
@@ -9,11 +8,6 @@ export const hearingsTable = sqliteTable('hearings', {
     .references(() => caseTable.case_no), // Foreign key to Main DB's caseTable
   hearing_date: text('hearing_date').notNull(), // ISO 8601 date "YYYY-MM-DD" or "YYYY-MM-DDTHH:MM:SS"
   remarks: text('remarks'),
-  created_at: int('created_at', { mode: 'timestamp' })
-    .default(sql`(strftime('%s', 'now'))`)
-    .notNull(),
-  updated_at: int('updated_at', { mode: 'timestamp' })
-    .default(sql`(strftime('%s', 'now'))`)
-    .$onUpdate(() => sql`(strftime('%s', 'now'))`)
-    .notNull(),
-});
+}, (table) => [
+  unique('uq_case_hearing_date').on(table.case_no, table.hearing_date)
+]);
