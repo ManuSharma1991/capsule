@@ -1,7 +1,6 @@
 import { stagingDb } from '../../db';
 import { CaseTable, caseTable, hearingsTable, HearingTable } from '../../db/schema/staging';
 import { ImportCauseListData } from '../import/import.validation';
-import { convertToYYYYMMDD } from '../../utils/helpers';
 
 export const createCase = async (data: ImportCauseListData) => {
   // generate case_no from case_type, s_no, place_of_filing, year_of_filing
@@ -29,14 +28,13 @@ export const createCase = async (data: ImportCauseListData) => {
   }
 
   const firstHearing: HearingTable = {
-    hearing_date: convertToYYYYMMDD(data.hearing_date)!,
+    hearing_date: data.hearing_date,
     case_no: case_no,
     remarks: data.remarks,
   };
 
   try {
     stagingDb.transaction((tx) => {
-
       tx.insert(caseTable)
         .values(newCase)
         .onConflictDoUpdate({ target: caseTable.case_no, set: newCase })
@@ -47,12 +45,11 @@ export const createCase = async (data: ImportCauseListData) => {
       if (data.next_hearing_date) {
         const nextHearingEntry: HearingTable = {
           case_no: case_no,
-          hearing_date: convertToYYYYMMDD(data.next_hearing_date)!,
+          hearing_date: data.next_hearing_date,
         };
         tx.insert(hearingsTable).values(nextHearingEntry).run();
       }
     });
-
   } catch (error) {
     console.error('Failed to create case and hearings:', error);
   }

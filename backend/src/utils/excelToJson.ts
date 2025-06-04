@@ -17,30 +17,45 @@ export type SheetData = Record<string, unknown>[];
 export type ExcelJsonData = Record<string, SheetData>;
 
 interface ExcelToJsonOptions {
-    /**
-     * If specified, only this sheet will be processed.
-     * Can be the sheet name (string) or 0-based index (number).
-     * If undefined, all sheets are processed.
-     */
-    sheetNameOrIndex?: string | number;
-    /**
-     * Passed to XLSX.utils.sheet_to_json.
-     * If true, raw values are returned. If false (default), formatted text is used.
-     * Dates are typically converted to JS Date objects if raw is false.
-     */
-    rawValues?: boolean;
-    /**
-     * Passed to XLSX.utils.sheet_to_json.
-     * Use this to specify a date format string if dates are not parsing correctly.
-     * e.g., "yyyy-mm-dd"
-     */
-    dateNF?: string;
-    /**
-     * Passed to XLSX.utils.sheet_to_json.
-     * If true, blank rows will be skipped. If false (default), they will be included.
-     */
-    skipBlankRows?: boolean;
+  /**
+   * If specified, only this sheet will be processed.
+   * Can be the sheet name (string) or 0-based index (number).
+   * If undefined, all sheets are processed.
+   */
+  sheetNameOrIndex?: string | number;
+  /**
+   * If true, raw values are returned (Date objects for dates, numbers for numbers).
+   * If false, formatted text is used (numbers might become strings, dates are formatted by xlsx).
+   * For custom date formatting, it's recommended to use rawValues: true and format dates manually.
+   * Defaults to true for better type preservation and custom date handling.
+   */
+  rawValues?: boolean;
+  /**
+   * Passed to XLSX.utils.sheet_to_json if rawValues is false.
+   * Use this to specify a date format string if dates are not parsing correctly AND rawValues is false.
+   * e.g., "yyyy-mm-dd"
+   * Note: This option has no effect if rawValues is true, as date formatting is handled post-conversion.
+   */
+  dateNF?: string;
+  /**
+   * Passed to XLSX.utils.sheet_to_json.
+   * If true, blank rows will be skipped. If false (default), they will be included.
+   */
+  skipBlankRows?: boolean;
+  /**
+   * A function to format JavaScript Date objects into strings.
+   * If not provided, and rawValues is true, Date objects will be left as is (and may stringify to ISO format).
+   * Default formats to 'YYYY-MM-DD'.
+   */
+  customDateFormatter?: (date: Date) => string;
 }
+
+const defaultDateFormatter = (date: Date): string => {
+  const year = date.getFullYear();
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const day = date.getDate().toString().padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
 
 /**
  * Converts an Excel file (ODS, XLSX, etc.) into JSON.
@@ -54,77 +69,108 @@ interface ExcelToJsonOptions {
  *          or just the array of row objects if only one sheet is requested.
  */
 export const excelFileToJson = async (
-    fileInput: string | Buffer | ArrayBuffer,
-    options: ExcelToJsonOptions = {}
+  fileInput: string | Buffer | ArrayBuffer,
+  options: ExcelToJsonOptions = {}
 ): Promise<ExcelJsonData | SheetData> => {
-    try {
-        let workbook: XLSX.WorkBook;
+  try {
+    let workbook: XLSX.WorkBook;
 
-        if (typeof fileInput === 'string') {
-            // Reading from file path (Node.js specific)
-            if (!fs.existsSync(fileInput)) {
-                throw new Error(`File not found: ${fileInput}`);
-            }
-            workbook = XLSX.readFile(fileInput, { cellDates: true }); // cellDates: true helps with date parsing
-        } else if (Buffer.isBuffer(fileInput)) {
-            workbook = XLSX.read(fileInput, { type: 'buffer', cellDates: true });
-        } else if (fileInput instanceof ArrayBuffer) {
-            workbook = XLSX.read(new Uint8Array(fileInput), { type: 'array', cellDates: true });
-        } else {
-            throw new Error('Invalid file input type. Expected string (path), Buffer, or ArrayBuffer.');
-        }
+    // Always use cellDates: true when reading the workbook to get JS Date objects
+    const readOpts: XLSX.ParsingOptions = { cellDates: true };
 
-        const result: ExcelJsonData = {};
-        let sheetToProcess: string[] = workbook.SheetNames;
-
-        if (options.sheetNameOrIndex !== undefined) {
-            if (typeof options.sheetNameOrIndex === 'string') {
-                if (!workbook.SheetNames.includes(options.sheetNameOrIndex)) {
-                    throw new Error(`Sheet "${options.sheetNameOrIndex}" not found in the workbook.`);
-                }
-                sheetToProcess = [options.sheetNameOrIndex];
-            } else if (typeof options.sheetNameOrIndex === 'number') {
-                if (options.sheetNameOrIndex < 0 || options.sheetNameOrIndex >= workbook.SheetNames.length) {
-                    throw new Error(`Sheet index ${options.sheetNameOrIndex} is out of bounds.`);
-                }
-                sheetToProcess = [workbook.SheetNames[options.sheetNameOrIndex]];
-            }
-        }
-
-        const sheetToJsonOptions: XLSX.Sheet2JSONOpts = {
-            raw: options.rawValues === undefined ? false : options.rawValues, // default to false for better date handling
-            defval: '', // Default value for blank cells
-        };
-        if (options.dateNF) {
-            sheetToJsonOptions.dateNF = options.dateNF;
-        }
-        if (options.skipBlankRows) {
-            sheetToJsonOptions.blankrows = false; // sheet_to_json uses `blankrows: false` to skip
-        } else {
-            sheetToJsonOptions.blankrows = true; // default is true to include
-        }
-
-
-        for (const sheetName of sheetToProcess) {
-            const worksheet = workbook.Sheets[sheetName];
-            if (!worksheet) continue; // Should not happen if sheetToProcess is derived from workbook.SheetNames
-
-            const jsonData: SheetData = XLSX.utils.sheet_to_json<Record<string, unknown>>(
-                worksheet,
-                sheetToJsonOptions
-            );
-            result[sheetName] = jsonData;
-        }
-
-        // If a specific sheet was requested and found, and it's the only one,
-        // you might want to return just its data array instead of the wrapper object.
-        if (options.sheetNameOrIndex !== undefined && sheetToProcess.length === 1) {
-            return result[sheetToProcess[0]];
-        }
-
-        return result;
-    } catch (error) {
-        console.error('Error converting Excel to JSON:', error);
-        throw new Error(`Failed to parse Excel file: ${error instanceof Error ? error.message : String(error)}`);
+    if (typeof fileInput === 'string') {
+      if (!fs.existsSync(fileInput)) {
+        throw new Error(`File not found: ${fileInput}`);
+      }
+      workbook = XLSX.readFile(fileInput, readOpts);
+    } else if (Buffer.isBuffer(fileInput)) {
+      workbook = XLSX.read(fileInput, { ...readOpts, type: 'buffer' });
+    } else if (fileInput instanceof ArrayBuffer) {
+      workbook = XLSX.read(new Uint8Array(fileInput), { ...readOpts, type: 'array' });
+    } else {
+      throw new Error('Invalid file input type. Expected string (path), Buffer, or ArrayBuffer.');
     }
-}
+
+    const result: ExcelJsonData = {};
+    let sheetToProcess: string[] = workbook.SheetNames;
+
+    if (options.sheetNameOrIndex !== undefined) {
+      if (typeof options.sheetNameOrIndex === 'string') {
+        if (!workbook.SheetNames.includes(options.sheetNameOrIndex)) {
+          throw new Error(`Sheet "${options.sheetNameOrIndex}" not found in the workbook.`);
+        }
+        sheetToProcess = [options.sheetNameOrIndex];
+      } else if (typeof options.sheetNameOrIndex === 'number') {
+        if (
+          options.sheetNameOrIndex < 0 ||
+          options.sheetNameOrIndex >= workbook.SheetNames.length
+        ) {
+          throw new Error(`Sheet index ${options.sheetNameOrIndex} is out of bounds.`);
+        }
+        sheetToProcess = [workbook.SheetNames[options.sheetNameOrIndex]];
+      }
+    }
+
+    // Default to raw: true for better type handling and custom date formatting.
+    // If user explicitly sets rawValues: false, then use that.
+    const useRawValues = options.rawValues === undefined ? true : options.rawValues;
+
+    const sheetToJsonOptions: XLSX.Sheet2JSONOpts = {
+      raw: useRawValues,
+      defval: '', // Default value for blank cells
+    };
+
+    if (!useRawValues && options.dateNF) {
+      // dateNF only makes sense if rawValues is false
+      sheetToJsonOptions.dateNF = options.dateNF;
+    }
+
+    if (options.skipBlankRows) {
+      sheetToJsonOptions.blankrows = false;
+    } else {
+      sheetToJsonOptions.blankrows = true;
+    }
+
+    const dateFormatter = options.customDateFormatter || defaultDateFormatter;
+
+    for (const sheetName of sheetToProcess) {
+      const worksheet = workbook.Sheets[sheetName];
+      if (!worksheet) continue;
+
+      let jsonData: SheetData = XLSX.utils.sheet_to_json<Record<string, unknown>>(
+        worksheet,
+        sheetToJsonOptions
+      );
+
+      // If rawValues is true (or default), post-process to format dates
+      if (useRawValues) {
+        jsonData = jsonData.map((row) => {
+          const newRow: Record<string, unknown> = {};
+          for (const key in row) {
+            if (Object.prototype.hasOwnProperty.call(row, key)) {
+              const value = row[key];
+              if (value instanceof Date) {
+                newRow[key] = dateFormatter(value);
+              } else {
+                newRow[key] = value;
+              }
+            }
+          }
+          return newRow;
+        });
+      }
+      result[sheetName] = jsonData;
+    }
+
+    if (options.sheetNameOrIndex !== undefined && sheetToProcess.length === 1) {
+      return result[sheetToProcess[0]];
+    }
+
+    return result;
+  } catch (error) {
+    console.error('Error converting Excel to JSON:', error);
+    throw new Error(
+      `Failed to parse Excel file: ${error instanceof Error ? error.message : String(error)}`
+    );
+  }
+};
