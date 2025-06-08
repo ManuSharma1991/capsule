@@ -4,36 +4,66 @@ export interface ReportCardData {
     value: string | number;
     icon?: React.ElementType; // For an optional icon
     color?: string;
+    totalCauseList: number;
+    casesAdjournedCurrentMonth: number;
+    casesAdjournedNextMonth: number;
+    casesAdjournedAfterNextMonth: number;
+    casesAdjournedRemainingMonths: number;
+    casesHeard: number;
+    totalCases: number;
+    monthName: string;
+}
+
+export interface YearlyCaseData {
+    year: string;
+    totalCases: number;
+    pendingCases: number;
 }
 
 export interface CaseStatusData {
     title: string;
-    count: number;
+    totalCases: number;
+    totalCasesPending: number;
+    casesPendingCITDR: number;
+    casesPendingSrDR: number;
     icon?: React.ElementType;
     color?: string;
+    yearlyData?: YearlyCaseData[]; // New field for bar chart data
 }
 
-export interface InternalTableRowData {
+export interface HearingData {
     id: string;
-    attribute: string;
-    value: string;
-    lastUpdated: string;
+    date: string;
+    remarks: string;
+}
+
+export interface CaseFinancialsData {
+    id: string;
+    disputedAmount: string;
+    caseStatus: string; // This might be redundant with MainTableRowData.status, but keeping for now as per request
+    // Add other relevant financial/status details here as needed
 }
 
 export interface MainTableRowData {
     id: string;
     caseNumber: string;
-    applicantName: string;
+    filedBy: 'ASSESSEE' | 'DEPARTMENT'; // New field
+    applicantName: string; // Assessee's name if filedBy is ASSESSEE
+    respondantName: string; // Department's name if filedBy is DEPARTMENT
+    assessmentYear: string; // New field
+    assessedSection: string; // New field
     status: 'Open' | 'Closed' | 'Pending' | 'In Progress';
     assignedTo: string;
     lastActivity: string;
-    details: InternalTableRowData[]; // Data for the expandable internal table
+    hearings: HearingData[]; // Changed from 'details' to 'hearings'
+    financials: CaseFinancialsData; // New field for financial/status details
 }
 
 export interface DashboardData {
     reportCard: ReportCardData;
     caseStatusCard: CaseStatusData;
     cases: MainTableRowData[];
+    selectedMonth: string;
 }
 
 // You might also reuse this from your auth types

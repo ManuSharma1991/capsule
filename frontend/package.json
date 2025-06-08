@@ -25,6 +25,7 @@
     "react-hook-form": "^7.56.4",
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.6.1",
+    "recharts": "^2.15.3",
     "winston": "^2.4.6",
     "zod": "^3.25.42"
   },
