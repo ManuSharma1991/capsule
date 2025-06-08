@@ -1,5 +1,5 @@
 // src/server.ts
-import express, { Express, Request, Response, NextFunction } from 'express';
+import express, { Express, Request, Response } from 'express';
 import path from 'path';
 import cors from 'cors';
 import morgan from 'morgan';
@@ -44,6 +44,28 @@ app.use(express.urlencoded({ extended: true }));
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 
 // --- Health Check ---
+/**
+ * @swagger
+ * /api/health:
+ *   get:
+ *     summary: Checks the health of the backend service.
+ *     tags:
+ *       - Health
+ *     responses:
+ *       200:
+ *         description: Backend is healthy.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: UP
+ *                 message:
+ *                   type: string
+ *                   example: Capsule backend is healthy! Using DB at: /path/to/database.sqlite
+ */
 app.get('/api/health', (req: Request, res: Response) => {
   const dbPath = process.env.DATABASE_URL || path.join(__dirname, './db/database.sqlite');
   res.status(200).json({
@@ -79,7 +101,7 @@ if (process.env.NODE_ENV === 'production') {
 app.use((err: Error, req: Request, res: Response) => {
   console.error('Unhandled Error:', err.stack || err.message);
 
-  const statusCode = (err as any).status || 500;
+  const statusCode = (err as { status?: number }).status || 500;
   const isProd = process.env.NODE_ENV === 'production';
 
   res.status(statusCode).json({
