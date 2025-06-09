@@ -10,21 +10,17 @@ import { fetchDashboardData } from '../../lib/mock/dashboardMock';
 import type { DashboardData } from '../../types/dashboard';
 import type { BackendErrorResponse } from '../../types/backendErrorResponse';
 
-import { FullPageBackground, Main, DrawerHeader } from '../../components/DashboardComponents/DashboardStyles';
-import DashboardAppBar from '../../components/DashboardComponents/DashboardAppBar';
-import DashboardDrawer from '../../components/DashboardComponents/DashboardDrawer';
 import DashboardCardsSection from '../../components/DashboardComponents/DashboardCardsSection';
 import DashboardCasesTable from '../../components/DashboardComponents/DashboardCasesTable';
 import DateFilmstripCalendar from '../../components/DashboardComponents/DateFilmstripCalendar';
 import DashboardStatusDisplay from '../../components/DashboardComponents/DashboardStatusDisplay';
-import DashboardFooter from '../../components/DashboardComponents/DashboardFooter';
 
 
 // --- Main Dashboard Page Component ---
 const DashboardPage = () => {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-    const [drawerOpen, setDrawerOpen] = useState(!isMobile); // Open by default on desktop
+    // const [drawerOpen, setDrawerOpen] = useState(!isMobile); // Open by default on desktop // Handled by MainLayout
 
     const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -58,72 +54,55 @@ const DashboardPage = () => {
         loadData();
     }, []);
 
-    useEffect(() => {
-        setDrawerOpen(!isMobile);
-    }, [isMobile]);
+    // useEffect(() => { // Handled by MainLayout
+    //     setDrawerOpen(!isMobile);
+    // }, [isMobile]);
 
-    const handleDrawerToggle = () => {
-        setDrawerOpen(!drawerOpen);
-    };
+    // const handleDrawerToggle = () => { // Handled by MainLayout
+    //     setDrawerOpen(!drawerOpen);
+    // };
 
     const handleRowToggleExpand = (rowId: string) => {
         setExpandedRowId(expandedRowId === rowId ? null : rowId);
     };
 
     return (
-        <FullPageBackground>
-            <Box sx={{ display: 'flex' }}>
-                <DashboardAppBar
-                    drawerOpen={drawerOpen}
-                    handleDrawerToggle={handleDrawerToggle}
-                />
+        <>
+            <DashboardStatusDisplay
+                isLoading={isLoading}
+                error={error}
+                dashboardData={dashboardData}
+            />
 
-                <DashboardDrawer
-                    drawerOpen={drawerOpen}
-                    handleDrawerToggle={handleDrawerToggle}
-                />
-
-                <Main open={drawerOpen}>
-                    <DrawerHeader />
-
-                    <DashboardStatusDisplay
-                        isLoading={isLoading}
-                        error={error}
-                        dashboardData={dashboardData}
+            {dashboardData && (
+                <>
+                    <DateFilmstripCalendar
+                        selectedDate={selectedDate}
+                        setSelectedDate={setSelectedDate}
                     />
-
-                    {dashboardData && (
-                        <>
-                            <DateFilmstripCalendar
-                                selectedDate={selectedDate}
-                                setSelectedDate={setSelectedDate}
-                            />
-                            <Box sx={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: 2 }}>
-                                <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-                                    <Box mt={2}> {/* Add some margin between calendar and cards */}
-                                        <DashboardCardsSection
-                                            dashboardData={dashboardData}
-                                            selectedMonth={selectedMonth}
-                                            setSelectedMonth={setSelectedMonth}
-                                            setDashboardData={setDashboardData}
-                                        />
-                                    </Box>
-                                </Box>
-                                <Box sx={{ flex: 1 }}>
-                                    <DashboardCasesTable
-                                        cases={dashboardData.cases}
-                                        expandedRowId={expandedRowId}
-                                        handleRowToggleExpand={handleRowToggleExpand}
-                                        selectedDate={selectedDate}
-                                    />
-                                </Box>
+                    <Box sx={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: 2 }}>
+                        <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                            <Box mt={2}> {/* Add some margin between calendar and cards */}
+                                <DashboardCardsSection
+                                    dashboardData={dashboardData}
+                                    selectedMonth={selectedMonth}
+                                    setSelectedMonth={setSelectedMonth}
+                                    setDashboardData={setDashboardData}
+                                />
                             </Box>
-                        </>
-                    )}
-                    <DashboardFooter />
-                </Main>
-            </Box>
-        </FullPageBackground>
+                        </Box>
+                        <Box sx={{ flex: 1 }}>
+                            <DashboardCasesTable
+                                cases={dashboardData.cases}
+                                expandedRowId={expandedRowId}
+                                handleRowToggleExpand={handleRowToggleExpand}
+                                selectedDate={selectedDate}
+                            />
+                        </Box>
+                    </Box>
+                </>
+            )}
+        </>
     );
 };
 

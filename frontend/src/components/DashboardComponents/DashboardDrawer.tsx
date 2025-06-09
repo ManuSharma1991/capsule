@@ -20,6 +20,7 @@ import KeyboardArrowRightIcon from '@mui/icons-material/ChevronRight';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import GavelIcon from '@mui/icons-material/Gavel';
 import { drawerWidth, DrawerHeader } from './DashboardStyles';
+import { useNavigate } from 'react-router-dom';
 
 interface DashboardDrawerProps {
     drawerOpen: boolean;
@@ -29,6 +30,7 @@ interface DashboardDrawerProps {
 const DashboardDrawer: FC<DashboardDrawerProps> = ({ drawerOpen, handleDrawerToggle }) => {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+    const navigate = useNavigate();
 
     return (
         <Drawer
@@ -53,7 +55,27 @@ const DashboardDrawer: FC<DashboardDrawerProps> = ({ drawerOpen, handleDrawerTog
             </DrawerHeader>
             <List>
                 {['Dashboard', 'Cases', 'Reports', 'Settings'].map((text, index) => (
-                    <ListItem key={text} disablePadding>
+                    <ListItem key={text}
+                        onClick={() => {
+                            handleDrawerToggle();
+                            switch (text) {
+                                case 'Dashboard':
+                                    navigate('/dashboard');
+                                    break;
+                                case 'Cases':
+                                    navigate('/cases');
+                                    break;
+                                case 'Reports':
+                                    navigate('/reports');
+                                    break;
+                                case 'Settings':
+                                    navigate('/settings');
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }}
+                        disablePadding>
                         <ListItemButton>
                             <ListItemIcon>
                                 {index === 0 && <DashboardIcon />}
