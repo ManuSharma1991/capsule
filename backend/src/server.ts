@@ -37,8 +37,8 @@ app.use(
 );
 
 // --- Body Parsers ---
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // --- Logging ---
 app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
@@ -64,7 +64,7 @@ app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
  *                   example: UP
  *                 message:
  *                   type: string
- *                   example: Capsule backend is healthy! Using DB at: /path/to/database.sqlite
+ *                   example: Capsule backend is healthy!
  */
 app.get('/api/health', (req: Request, res: Response) => {
   const dbPath = process.env.DATABASE_URL || path.join(__dirname, './db/database.sqlite');

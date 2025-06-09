@@ -19,16 +19,41 @@ export const importCauseListDataSchema = z.object({
 
 export const importCauseListArraySchema = z.array(importCauseListDataSchema);
 
+export type ValidationError = {
+  index: number;
+  errors: z.ZodError<ImportCauseListData>['formErrors'];
+};
+
 export const validateImportCauseListArrayPayload = (
   input: unknown
-):
-  | { success: true; data: ImportCauseListDataArray }
-  | { success: false; error: z.ZodError<ImportCauseListDataArray>['formErrors'] } => {
-  const result = importCauseListArraySchema.safeParse(input); // Use the array schema here
-  if (!result.success) {
-    return { success: false, error: result.error.flatten() };
+): { success: true; data: ImportCauseListDataArray; errors: ValidationError[] } => {
+  const validData: ImportCauseListDataArray = [];
+  const errors: ValidationError[] = [];
+
+  if (!Array.isArray(input)) {
+    // If the input is not an array, treat it as a single error for the whole payload
+    // Or handle as per application's error handling policy for non-array inputs
+    // For now, we'll return an empty validData and an error indicating invalid input type
+    errors.push({
+      index: -1, // Indicate a general payload error
+      errors: { formErrors: ['Input is not an array'], fieldErrors: {} },
+    });
+    return { success: true, data: [], errors };
   }
-  return { success: true, data: result.data };
+
+  input.forEach((item, index) => {
+    const result = importCauseListDataSchema.safeParse(item);
+    if (result.success) {
+      validData.push(result.data);
+    } else {
+      errors.push({
+        index: index,
+        errors: result.error.flatten(),
+      });
+    }
+  });
+
+  return { success: true, data: validData, errors };
 };
 
 export type ImportCauseListData = z.infer<typeof importCauseListDataSchema>;
