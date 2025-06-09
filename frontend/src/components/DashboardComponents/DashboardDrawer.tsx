@@ -20,7 +20,7 @@ import KeyboardArrowRightIcon from '@mui/icons-material/ChevronRight';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import GavelIcon from '@mui/icons-material/Gavel';
 import { drawerWidth, DrawerHeader } from './DashboardStyles';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 interface DashboardDrawerProps {
     drawerOpen: boolean;
@@ -31,6 +31,14 @@ const DashboardDrawer: FC<DashboardDrawerProps> = ({ drawerOpen, handleDrawerTog
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
     const navigate = useNavigate();
+    const location = useLocation();
+
+    const menuItems = [
+        { text: 'Dashboard', path: '/dashboard', icon: <DashboardIcon /> },
+        { text: 'Cases', path: '/cases', icon: <GavelIcon /> },
+        { text: 'Reports', path: '/reports', icon: <BarChartIcon /> },
+        { text: 'Settings', path: '/settings', icon: <SettingsIcon /> },
+    ];
 
     return (
         <Drawer
@@ -54,36 +62,35 @@ const DashboardDrawer: FC<DashboardDrawerProps> = ({ drawerOpen, handleDrawerTog
                 </IconButton>
             </DrawerHeader>
             <List>
-                {['Dashboard', 'Cases', 'Reports', 'Settings'].map((text, index) => (
-                    <ListItem key={text}
+                {menuItems.map((item) => (
+                    <ListItem
+                        key={item.text}
                         onClick={() => {
-                            handleDrawerToggle();
-                            switch (text) {
-                                case 'Dashboard':
-                                    navigate('/dashboard');
-                                    break;
-                                case 'Cases':
-                                    navigate('/cases');
-                                    break;
-                                case 'Reports':
-                                    navigate('/reports');
-                                    break;
-                                case 'Settings':
-                                    navigate('/settings');
-                                    break;
-                                default:
-                                    break;
-                            }
+                            navigate(item.path);
                         }}
-                        disablePadding>
-                        <ListItemButton>
-                            <ListItemIcon>
-                                {index === 0 && <DashboardIcon />}
-                                {index === 1 && <GavelIcon />}
-                                {index === 2 && <BarChartIcon />}
-                                {index === 3 && <SettingsIcon />}
+                        disablePadding
+                    >
+                        <ListItemButton
+                            sx={{
+                                backgroundColor: location.pathname === item.path ? theme.palette.primary.main : 'inherit',
+                                '&:hover': {
+                                    backgroundColor: location.pathname === item.path ? theme.palette.primary.dark : theme.palette.action.hover,
+                                },
+                            }}
+                        >
+                            <ListItemIcon
+                                sx={{
+                                    color: location.pathname === item.path ? theme.palette.common.white : 'inherit',
+                                }}
+                            >
+                                {item.icon}
                             </ListItemIcon>
-                            <ListItemText primary={text} />
+                            <ListItemText
+                                primary={item.text}
+                                sx={{
+                                    color: location.pathname === item.path ? theme.palette.common.white : 'inherit',
+                                }}
+                            />
                         </ListItemButton>
                     </ListItem>
                 ))}
