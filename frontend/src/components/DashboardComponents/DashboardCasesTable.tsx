@@ -29,7 +29,7 @@ const DashboardCasesTable: FC<DashboardCasesTableProps> = ({
 
     useEffect(() => {
         // Filter cases based on selectedDate
-        const filtered = cases.filter(caseItem => {
+        const filtered = cases.filter(() => {
             // Assuming caseItem.date is a string in 'YYYY-MM-DD' format or similar
             // For now, I'll use a mock date for filtering as MainTableRowData doesn't have a 'date' property.
             // This will need to be updated once the actual data structure is known or modified.

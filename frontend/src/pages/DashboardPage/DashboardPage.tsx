@@ -26,7 +26,7 @@ const DashboardPage = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [expandedRowId, setExpandedRowId] = useState<string | null>(null);
-    const [selectedMonth, setSelectedMonth] = useState<string>(''); // State for month dropdown
+    const [selectedMonth, setSelectedMonth] = useState<string>(new Date().toLocaleString('default', { month: 'long' })); // State for month dropdown, default to current month
     const [selectedDate, setSelectedDate] = useState<Date>(new Date()); // New state for selected date
 
     useEffect(() => {
@@ -36,7 +36,6 @@ const DashboardPage = () => {
             try {
                 const data = await fetchDashboardData();
                 setDashboardData(data);
-                setSelectedMonth(data.selectedMonth);
             } catch (err: unknown) {
                 console.error("Failed to load dashboard data:", err);
                 let displayMessage = "An unexpected error occurred.";

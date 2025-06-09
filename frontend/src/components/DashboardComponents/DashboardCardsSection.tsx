@@ -58,7 +58,7 @@ const DashboardCardsSection: FC<DashboardCardsSectionProps> = ({
                 <DashboardCard elevation={3} sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Box sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                            {caseStatusCard.icon && <caseStatusCard.icon sx={{ fontSize: 30, color: caseStatusCard.color || 'secondary.main', mr: 1 }} />}
+                            {/* {caseStatusCard.icon && <caseStatusCard.icon sx={{ fontSize: 30, color: caseStatusCard.color || 'secondary.main', mr: 1 }} />} */}
                             <Typography variant="h6" component="div" sx={{ color: 'text.primary' }}>
                                 {caseStatusCard.title}
                             </Typography>
@@ -116,7 +116,7 @@ const DashboardCardsSection: FC<DashboardCardsSectionProps> = ({
                             </Select>
                         </FormControl>
                     </Box>
-                    {reportCard.icon && <reportCard.icon sx={{ fontSize: 40, color: reportCard.color || 'primary.main', alignSelf: 'flex-end' }} />}
+                    {/* {reportCard.icon && <reportCard.icon sx={{ fontSize: 40, color: reportCard.color || 'primary.main', alignSelf: 'flex-end' }} />} */}
                     <Typography variant="body1" sx={{ color: 'text.secondary', mb: 0.5 }}>
                         Total CauseList for the month of {reportCard.monthName}: {reportCard.totalCauseList}
                     </Typography>
