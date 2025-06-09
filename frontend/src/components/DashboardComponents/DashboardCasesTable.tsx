@@ -1,4 +1,4 @@
-import { type FC } from 'react';
+import { type FC, useState, useEffect } from 'react';
 import {
     Paper,
     Table,
@@ -8,28 +8,45 @@ import {
     TableHead,
     TableRow,
     Typography,
-    Button,
 } from '@mui/material';
 import ExpandableTableRow from './ExpandableTableRow';
 import type { MainTableRowData } from '../../types/dashboard';
 
 interface DashboardCasesTableProps {
-    filteredCases: MainTableRowData[];
+    cases: MainTableRowData[];
     expandedRowId: string | null;
     handleRowToggleExpand: (rowId: string) => void;
-    handleSearchDatabase: () => void;
-    searchQuery: string;
+    selectedDate: Date;
 }
 
 const DashboardCasesTable: FC<DashboardCasesTableProps> = ({
-    filteredCases,
+    cases,
     expandedRowId,
     handleRowToggleExpand,
-    handleSearchDatabase,
-    searchQuery,
+    selectedDate,
 }) => {
+    const [displayedCases, setDisplayedCases] = useState<MainTableRowData[]>([]);
+
+    useEffect(() => {
+        // Filter cases based on selectedDate
+        const filtered = cases.filter(caseItem => {
+            // Assuming caseItem.date is a string in 'YYYY-MM-DD' format or similar
+            // For now, I'll use a mock date for filtering as MainTableRowData doesn't have a 'date' property.
+            // This will need to be updated once the actual data structure is known or modified.
+            // For demonstration, let's assume all mock data is for today.
+            const mockCaseDate = new Date(); // Replace with actual caseItem.date when available
+            return mockCaseDate.toDateString() === selectedDate.toDateString();
+        });
+        setDisplayedCases(filtered);
+    }, [cases, selectedDate]);
+
+    // Helper to format date for display (e.g., "Mon, Sep 09")
+    const formatDateForDisplay = (date: Date) => {
+        return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    };
+
     return (
-        <Paper sx={{ width: '100%', overflow: 'hidden', flexGrow: 1, display: 'flex', flexDirection: 'column', mt: 4 }} elevation={3}>
+        <Paper sx={{ width: '100%', overflow: 'hidden', flexGrow: 1, display: 'flex', flexDirection: 'column', mt: 2 }} elevation={3}>
             <TableContainer sx={{ flexGrow: 1 }}>
                 <Table stickyHeader aria-label="collapsible table">
                     <TableHead>
@@ -43,8 +60,8 @@ const DashboardCasesTable: FC<DashboardCasesTableProps> = ({
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {filteredCases.length > 0 ? (
-                            filteredCases.map((row) => (
+                        {displayedCases.length > 0 ? (
+                            displayedCases.map((row) => (
                                 <ExpandableTableRow
                                     key={row.id}
                                     row={row}
@@ -56,11 +73,8 @@ const DashboardCasesTable: FC<DashboardCasesTableProps> = ({
                             <TableRow>
                                 <TableCell colSpan={6} sx={{ textAlign: 'center', py: 3 }}>
                                     <Typography variant="subtitle1" color="text.secondary">
-                                        No matching cases found in current view.
+                                        No cases found for {formatDateForDisplay(selectedDate)}.
                                     </Typography>
-                                    <Button variant="contained" onClick={handleSearchDatabase} sx={{ mt: 2 }}>
-                                        Search Database for "{searchQuery}"
-                                    </Button>
                                 </TableCell>
                             </TableRow>
                         )}

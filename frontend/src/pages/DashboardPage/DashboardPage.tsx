@@ -7,15 +7,15 @@ import {
 import { AxiosError } from 'axios';
 
 import { fetchDashboardData } from '../../lib/mock/dashboardMock';
-import type { DashboardData, MainTableRowData } from '../../types/dashboard';
+import type { DashboardData } from '../../types/dashboard';
 import type { BackendErrorResponse } from '../../types/backendErrorResponse';
 
 import { FullPageBackground, Main, DrawerHeader } from '../../components/DashboardComponents/DashboardStyles';
 import DashboardAppBar from '../../components/DashboardComponents/DashboardAppBar';
 import DashboardDrawer from '../../components/DashboardComponents/DashboardDrawer';
 import DashboardCardsSection from '../../components/DashboardComponents/DashboardCardsSection';
-import DashboardSearchBar from '../../components/DashboardComponents/DashboardSearchBar';
 import DashboardCasesTable from '../../components/DashboardComponents/DashboardCasesTable';
+import DateFilmstripCalendar from '../../components/DashboardComponents/DateFilmstripCalendar';
 import DashboardStatusDisplay from '../../components/DashboardComponents/DashboardStatusDisplay';
 import DashboardFooter from '../../components/DashboardComponents/DashboardFooter';
 
@@ -30,9 +30,8 @@ const DashboardPage = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [expandedRowId, setExpandedRowId] = useState<string | null>(null);
-    const [searchQuery, setSearchQuery] = useState<string>(''); // New state for search query
-    const [filteredCases, setFilteredCases] = useState<MainTableRowData[]>([]); // New state for filtered cases
     const [selectedMonth, setSelectedMonth] = useState<string>(''); // State for month dropdown
+    const [selectedDate, setSelectedDate] = useState<Date>(new Date()); // New state for selected date
 
     useEffect(() => {
         const loadData = async () => {
@@ -63,35 +62,13 @@ const DashboardPage = () => {
         setDrawerOpen(!isMobile);
     }, [isMobile]);
 
-    useEffect(() => {
-        if (dashboardData) {
-            const lowercasedQuery = searchQuery.toLowerCase();
-            const filtered = dashboardData.cases.filter(caseItem =>
-                caseItem.caseNumber.toLowerCase().includes(lowercasedQuery) ||
-                caseItem.filedBy.toLowerCase().includes(lowercasedQuery) ||
-                caseItem.applicantName.toLowerCase().includes(lowercasedQuery) ||
-                caseItem.respondantName.toLowerCase().includes(lowercasedQuery) ||
-                caseItem.assessmentYear.toLowerCase().includes(lowercasedQuery) ||
-                caseItem.assessedSection.toLowerCase().includes(lowercasedQuery)
-            );
-            setFilteredCases(filtered);
-        }
-    }, [searchQuery, dashboardData]);
-
     const handleDrawerToggle = () => {
         setDrawerOpen(!drawerOpen);
-    };
-
-    const handleSearchDatabase = () => {
-        alert(`Searching database for: ${searchQuery}`);
-        // Here you would typically make an API call to your backend
-        // e.g., dataService.searchCases(searchQuery).then(results => { /* update state */ });
     };
 
     const handleRowToggleExpand = (rowId: string) => {
         setExpandedRowId(expandedRowId === rowId ? null : rowId);
     };
-
 
     return (
         <FullPageBackground>
@@ -117,25 +94,30 @@ const DashboardPage = () => {
 
                     {dashboardData && (
                         <>
-                            <DashboardCardsSection
-                                dashboardData={dashboardData}
-                                selectedMonth={selectedMonth}
-                                setSelectedMonth={setSelectedMonth}
-                                setDashboardData={setDashboardData}
+                            <DateFilmstripCalendar
+                                selectedDate={selectedDate}
+                                setSelectedDate={setSelectedDate}
                             />
-
-                            <DashboardSearchBar
-                                searchQuery={searchQuery}
-                                setSearchQuery={setSearchQuery}
-                            />
-
-                            <DashboardCasesTable
-                                filteredCases={filteredCases}
-                                expandedRowId={expandedRowId}
-                                handleRowToggleExpand={handleRowToggleExpand}
-                                handleSearchDatabase={handleSearchDatabase}
-                                searchQuery={searchQuery}
-                            />
+                            <Box sx={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: 2 }}>
+                                <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                                    <Box mt={2}> {/* Add some margin between calendar and cards */}
+                                        <DashboardCardsSection
+                                            dashboardData={dashboardData}
+                                            selectedMonth={selectedMonth}
+                                            setSelectedMonth={setSelectedMonth}
+                                            setDashboardData={setDashboardData}
+                                        />
+                                    </Box>
+                                </Box>
+                                <Box sx={{ flex: 1 }}>
+                                    <DashboardCasesTable
+                                        cases={dashboardData.cases}
+                                        expandedRowId={expandedRowId}
+                                        handleRowToggleExpand={handleRowToggleExpand}
+                                        selectedDate={selectedDate}
+                                    />
+                                </Box>
+                            </Box>
                         </>
                     )}
                     <DashboardFooter />

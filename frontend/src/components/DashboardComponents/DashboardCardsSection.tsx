@@ -53,8 +53,8 @@ const DashboardCardsSection: FC<DashboardCardsSectionProps> = ({
 
     return (
         <Grid container spacing={3} sx={{ mb: 3, flexShrink: 0 }}>
-            {/* Active Case Load Card (2/3 width) */}
-            <Grid size={{ xs: 12, md: 8 }} sx={{ height: '100%' }}>
+            {/* Active Case Load Card (Full width within its parent) */}
+            <Grid size={{ xs: 12, md: 12 }} sx={{ height: '100%' }}>
                 <DashboardCard elevation={3} sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Box sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
@@ -84,8 +84,8 @@ const DashboardCardsSection: FC<DashboardCardsSectionProps> = ({
                     )}
                 </DashboardCard>
             </Grid>
-            {/* Monthly Reports Card (1/3 width) */}
-            <Grid size={{ xs: 12, md: 4 }} sx={{ height: '100%' }}>
+            {/* Monthly Reports Card (Full width within its parent) */}
+            <Grid size={{ xs: 12, md: 12 }} sx={{ height: '100%' }}>
                 <DashboardCard elevation={3}>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', mb: 1 }}>
                         <Typography variant="h6" component="div" sx={{ color: 'text.primary' }}>
