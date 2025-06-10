@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Box, useTheme, useMediaQuery } from '@mui/material';
 import { Outlet } from 'react-router-dom'; // Import Outlet
-import DashboardAppBar from './DashboardComponents/DashboardAppBar';
 import DashboardDrawer from './DashboardComponents/DashboardDrawer';
-import { FullPageBackground, Main, DrawerHeader } from './DashboardComponents/DashboardStyles';
-import DashboardFooter from './DashboardComponents/DashboardFooter';
+import { FullPageBackground, Main } from './DashboardComponents/DashboardStyles';
 
 const MainLayout: React.FC = () => { // Remove children prop
     const theme = useTheme();
@@ -22,20 +20,14 @@ const MainLayout: React.FC = () => { // Remove children prop
     return (
         <FullPageBackground>
             <Box sx={{ display: 'flex' }}>
-                <DashboardAppBar
-                    drawerOpen={drawerOpen}
-                    handleDrawerToggle={handleDrawerToggle}
-                />
-
                 <DashboardDrawer
                     drawerOpen={drawerOpen}
                     handleDrawerToggle={handleDrawerToggle}
                 />
 
                 <Main open={drawerOpen}>
-                    <DrawerHeader />
+                    {/* <DrawerHeader /> */}
                     <Outlet /> {/* Render nested routes here */}
-                    <DashboardFooter />
                 </Main>
             </Box>
         </FullPageBackground>

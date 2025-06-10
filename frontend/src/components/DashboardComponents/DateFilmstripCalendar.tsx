@@ -50,7 +50,7 @@ const DateFilmstripCalendar: FC<DateFilmstripCalendarProps> = ({ selectedDate, s
     return (
         <Box
             sx={{
-                width: '100%', // Span entire space
+                // width: '100%', // Span entire space
                 display: 'flex',
                 alignItems: 'center',
                 py: 1,

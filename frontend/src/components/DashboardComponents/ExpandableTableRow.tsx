@@ -20,6 +20,7 @@ import type { AxiosResponse, AxiosError } from 'axios'; // Import AxiosResponse 
 
 interface ExpandableTableRowProps {
     row: MainTableRowData;
+    sno: number; // New prop for serial number
     isExpanded: boolean;
     onToggleExpand: () => void;
 }
@@ -40,7 +41,7 @@ const formatIndianCurrency = (amount: string | number): string => {
     return formatter.format(amount);
 };
 
-const ExpandableTableRow: FC<ExpandableTableRowProps> = ({ row, isExpanded, onToggleExpand }) => {
+const ExpandableTableRow: FC<ExpandableTableRowProps> = ({ row, sno, isExpanded, onToggleExpand }) => {
     const [caseDetails, setCaseDetails] = useState<Case | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -66,9 +67,12 @@ const ExpandableTableRow: FC<ExpandableTableRowProps> = ({ row, isExpanded, onTo
     return (
         <Fragment>
             <TableRow hover sx={{ '& > *': { borderBottom: 'unset' } }}>
-                <TableCell><IconButton aria-label="expand row" size="small" onClick={onToggleExpand}>
-                    {isExpanded ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-                </IconButton></TableCell>
+                <TableCell>
+                    <IconButton aria-label="expand row" size="small" onClick={onToggleExpand}>
+                        {isExpanded ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+                    </IconButton>
+                </TableCell>
+                <TableCell>{sno}</TableCell> {/* Display Sno */}
                 <TableCell component="th" scope="row">
                     {row.caseNo}
                 </TableCell>
@@ -80,7 +84,7 @@ const ExpandableTableRow: FC<ExpandableTableRowProps> = ({ row, isExpanded, onTo
                 <TableCell>{row.assessedSection}</TableCell>
             </TableRow>
             <TableRow>
-                <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
+                <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={7}> {/* Updated colSpan to 7 */}
                     <Collapse in={isExpanded} timeout="auto" unmountOnExit>
                         <Box sx={{ margin: 1, display: 'flex', gap: 2 }}>
                             {/* Left Side: Hearing Dates and Remarks */}

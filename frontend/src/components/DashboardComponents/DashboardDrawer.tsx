@@ -103,6 +103,20 @@ const DashboardDrawer: FC<DashboardDrawerProps> = ({ drawerOpen, handleDrawerTog
                         <ListItemText primary="Logout" />
                     </ListItemButton>
                 </ListItem>
+                <Typography
+                    variant="caption"
+                    sx={{
+                        textAlign: 'center',
+                        mt: 2,
+                        mb: 1,
+                        color: 'text.secondary',
+                        display: 'block', // Ensures it takes full width for centering
+                    }}
+                >
+                    {'ITAT Case Management System © '}
+                    {new Date().getFullYear()}
+                    {'.'}
+                </Typography>
             </List>
         </Drawer>
     );

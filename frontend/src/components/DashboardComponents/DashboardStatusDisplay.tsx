@@ -10,12 +10,17 @@ import { FullPageBackground } from './DashboardStyles';
 import type { DashboardData } from '../../types/dashboard';
 
 interface DashboardStatusDisplayProps {
-    isLoading: boolean;
-    error: string | null;
     dashboardData: DashboardData | null;
+    // Optional props for specific error display when passed from parent
+    isLoading?: boolean;
+    error?: string | null;
 }
 
 const DashboardStatusDisplay: FC<DashboardStatusDisplayProps> = ({ isLoading, error, dashboardData }) => {
+    // This component is now primarily for initial full-page loading/error or no data.
+    // Individual components will handle their own loading/error states.
+
+    // If isLoading is explicitly true (e.g., initial app load)
     if (isLoading) {
         return (
             <FullPageBackground sx={{ alignItems: 'center', justifyContent: 'center' }}>
@@ -25,6 +30,7 @@ const DashboardStatusDisplay: FC<DashboardStatusDisplayProps> = ({ isLoading, er
         );
     }
 
+    // If error is explicitly provided (e.g., initial app load error)
     if (error) {
         return (
             <FullPageBackground sx={{ alignItems: 'center', justifyContent: 'center', p: 3 }}>
@@ -39,6 +45,7 @@ const DashboardStatusDisplay: FC<DashboardStatusDisplayProps> = ({ isLoading, er
         );
     }
 
+    // If no dashboard data is available after initial load
     if (!dashboardData) {
         return (
             <FullPageBackground sx={{ alignItems: 'center', justifyContent: 'center' }}>
