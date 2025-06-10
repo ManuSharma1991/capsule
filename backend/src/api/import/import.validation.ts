@@ -31,11 +31,8 @@ export const validateImportCauseListArrayPayload = (
   const errors: ValidationError[] = [];
 
   if (!Array.isArray(input)) {
-    // If the input is not an array, treat it as a single error for the whole payload
-    // Or handle as per application's error handling policy for non-array inputs
-    // For now, we'll return an empty validData and an error indicating invalid input type
     errors.push({
-      index: -1, // Indicate a general payload error
+      index: -1,
       errors: { formErrors: ['Input is not an array'], fieldErrors: {} },
     });
     return { success: true, data: [], errors };

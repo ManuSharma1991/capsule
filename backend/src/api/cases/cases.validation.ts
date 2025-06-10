@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const caseSchema = z.object({
-  case_type: z.enum(['ITA', 'MA', 'SA']),
+  case_type: z.enum(['ITA', 'MA', 'SA', 'CO']),
   s_no: z.number().int().positive(),
   place_of_filing: z.string().length(3),
   year_of_filing: z.number().min(1950).max(2100),
@@ -12,7 +12,7 @@ export const caseSchema = z.object({
   assessment_year: z.string().regex(/^\d{4}-\d{2}$/),
   assessed_section: z.string().optional(),
   disputed_amount: z.number().nonnegative(),
-  argued_by: z.enum(['CIT(DR)', 'Sr DR']),
+  argued_by: z.enum(['CIT (DR)', 'Sr DR']), // Updated with space
   case_status: z.enum(['PENDING', 'HEARD', 'COMPLETED']),
   case_result: z.enum(['ALLOWED', 'PARTLY ALLOWED', 'DISMISSED']).nullish(),
   date_of_order: z.string().nullish(),
@@ -24,6 +24,10 @@ export const caseSchema = z.object({
   needs_review: z.number().int().optional(),
 });
 
+export const getCaseByCaseNoSchema = z.object({
+  caseNo: z.string().regex(/^(ITA|MA|SA|CO)\s\d+\/[A-Z]{3}\/\d{4}$/, "Invalid case number format. Expected format: 'TYPE NUMBER/BENCH/YEAR'"),
+});
+
 export const validateCasePayload = (input: unknown) => {
   const result = caseSchema.safeParse(input);
   if (!result.success) {
@@ -33,3 +37,4 @@ export const validateCasePayload = (input: unknown) => {
 };
 
 export type CaseInput = z.infer<typeof caseSchema>;
+export type GetCaseByCaseNoInput = z.infer<typeof getCaseByCaseNoSchema>;

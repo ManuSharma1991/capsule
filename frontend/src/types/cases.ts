@@ -26,3 +26,9 @@ export interface Case {
     needsReview: boolean;
     hearings: Hearing[]; // Using the new Hearing type
 }
+
+export interface CauselistCase extends Case {
+    causelistSNo: number; // Sequential number for the causelist
+    hearingDate: string; // Formatted date string
+    remarks: string; // Remarks field
+}

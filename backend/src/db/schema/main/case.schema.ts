@@ -3,8 +3,8 @@ import { int, real, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 export const caseTable = sqliteTable('case_table', {
   // Standard auto-incrementing primary key
 
-  // one of {"ITA","MA","SA"}
-  case_type: text('case_type', { enum: ['ITA', 'MA', 'SA'] }).notNull(),
+  // one of {"ITA","MA","SA","CO"}
+  case_type: text('case_type', { enum: ['ITA', 'MA', 'SA', 'CO'] }).notNull(),
 
   // starts form 1, auto incremented, resets every year
   // NOTE: The 'resets every year' behavior cannot be enforced purely in the SQL schema
@@ -47,8 +47,8 @@ export const caseTable = sqliteTable('case_table', {
   // number (using real for potential decimal amounts)
   disputed_amount: real('disputed_amount').notNull(),
 
-  // either "CIT(DR)" or "Sr DR"
-  argued_by: text('argued_by', { enum: ['CIT(DR)', 'Sr DR'] }).notNull(),
+  // either "CIT (DR)" or "Sr DR"
+  argued_by: text('argued_by', { enum: ['CIT (DR)', 'Sr DR'] }).notNull(),
 
   // one of "PENDING", "HEARD", "COMPLETED"
   case_status: text('case_status', { enum: ['PENDING', 'HEARD', 'COMPLETED'] }).notNull(),

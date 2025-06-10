@@ -19,6 +19,7 @@ import KeyboardArrowLeftIcon from '@mui/icons-material/ChevronLeft';
 import KeyboardArrowRightIcon from '@mui/icons-material/ChevronRight';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import GavelIcon from '@mui/icons-material/Gavel';
+import ListAltIcon from '@mui/icons-material/ListAlt';
 import { drawerWidth, DrawerHeader } from './DashboardStyles';
 import { useLocation, useNavigate } from 'react-router-dom';
 
@@ -37,6 +38,7 @@ const DashboardDrawer: FC<DashboardDrawerProps> = ({ drawerOpen, handleDrawerTog
         { text: 'Dashboard', path: '/dashboard', icon: <DashboardIcon /> },
         { text: 'Cases', path: '/cases', icon: <GavelIcon /> },
         { text: 'Reports', path: '/reports', icon: <BarChartIcon /> },
+        { text: 'Generate Causelist', path: '/generate-causelist', icon: <ListAltIcon /> },
         { text: 'Settings', path: '/settings', icon: <SettingsIcon /> },
     ];
 
