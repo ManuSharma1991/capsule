@@ -28,17 +28,8 @@ const DashboardCasesTable: FC<DashboardCasesTableProps> = ({
     const [displayedCases, setDisplayedCases] = useState<MainTableRowData[]>([]);
 
     useEffect(() => {
-        // Filter cases based on selectedDate
-        const filtered = cases.filter(() => {
-            // Assuming caseItem.date is a string in 'YYYY-MM-DD' format or similar
-            // For now, I'll use a mock date for filtering as MainTableRowData doesn't have a 'date' property.
-            // This will need to be updated once the actual data structure is known or modified.
-            // For demonstration, let's assume all mock data is for today.
-            const mockCaseDate = new Date(); // Replace with actual caseItem.date when available
-            return mockCaseDate.toDateString() === selectedDate.toDateString();
-        });
-        setDisplayedCases(filtered);
-    }, [cases, selectedDate]);
+        setDisplayedCases(cases);
+    }, [cases]);
 
     // Helper to format date for display (e.g., "Mon, Sep 09")
     const formatDateForDisplay = (date: Date) => {

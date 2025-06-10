@@ -31,38 +31,44 @@ export interface CaseStatusData {
     yearlyData?: YearlyCaseData[]; // New field for bar chart data
 }
 
-export interface HearingData {
-    id: string;
-    date: string;
-    remarks: string;
+// Refined Hearing type to match backend response for hearings array
+export interface Hearing {
+    hearingDate: string; // Matches backend
+    remarks: string;     // Matches backend
 }
 
-export interface CaseFinancialsData {
-    id: string;
-    disputedAmount: string;
-    caseStatus: string; // This might be redundant with MainTableRowData.status, but keeping for now as per request
-    // Add other relevant financial/status details here as needed
-}
-
+// Refined MainTableRowData to match the flat structure returned by fetchCasesByHearingDate
 export interface MainTableRowData {
-    id: string;
-    caseNumber: string;
-    filedBy: 'ASSESSEE' | 'DEPARTMENT'; // New field
-    applicantName: string; // Assessee's name if filedBy is ASSESSEE
-    respondantName: string; // Department's name if filedBy is DEPARTMENT
-    assessmentYear: string; // New field
-    assessedSection: string; // New field
-    status: 'Open' | 'Closed' | 'Pending' | 'In Progress';
-    assignedTo: string;
-    lastActivity: string;
-    hearings: HearingData[]; // Changed from 'details' to 'hearings'
-    financials: CaseFinancialsData; // New field for financial/status details
+    id: string; // From caseTable.case_no
+    caseType: string;
+    sNo: string;
+    placeOfFiling: string;
+    yearOfFiling: string;
+    caseNo: string; // This is the same as id, but keeping both as backend returns both
+    filedBy: 'ASSESSEE' | 'DEPARTMENT'; // Keeping the union type for frontend validation
+    benchType: string;
+    appellantName: string;
+    respondantName: string;
+    assessmentYear: string;
+    assessedSection: string;
+    disputedAmount: string;
+    arguedBy: string;
+    caseStatus: string;
+    caseResult: string;
+    dateOfOrder: string;
+    dateOfFiling: string;
+    pan: string;
+    authorisedRepresentative: string;
+    notes: string;
+    isDetailPresent: boolean;
+    needsReview: boolean;
+    hearingDate: string; // From hearingsTable.hearing_date
 }
 
 export interface DashboardData {
     reportCard: ReportCardData;
     caseStatusCard: CaseStatusData;
-    cases: MainTableRowData[];
+    cases: MainTableRowData[]; // Still uses MainTableRowData for the dashboard table
     selectedMonth: string;
 }
 
