@@ -1,16 +1,10 @@
 import { Request, Response } from 'express';
 import * as caseService from './cases.service';
-import { validateCasePayload } from './cases.validation';
-import logger from '../../utils/logger';
+import { CaseInput } from './cases.validation';
 
 export const addCase = async (req: Request, res: Response) => {
-  const validation = validateCasePayload(req.body);
-  if (!validation.success) {
-    logger.error('Validation failed for case payload:', validation.error);
-    return res.status(400).json({ error: validation.error });
-  }
-
-  const result = await caseService.createCase(validation.data);
+  const caseData: CaseInput = req.body;
+  const result = await caseService.createCase(caseData);
   return res.status(201).json(result);
 };
 

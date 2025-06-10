@@ -40,14 +40,20 @@ export const createCase = async (data: ImportCauseListData) => {
         .onConflictDoUpdate({ target: caseTable.case_no, set: newCase })
         .run();
 
-      tx.insert(hearingsTable).values(firstHearing).run();
+      tx.insert(hearingsTable)
+        .values(firstHearing)
+        .onConflictDoUpdate({ target: [hearingsTable.case_no, hearingsTable.hearing_date], set: firstHearing })
+        .run();
 
       if (data.next_hearing_date) {
         const nextHearingEntry: HearingTable = {
           case_no: case_no,
           hearing_date: data.next_hearing_date,
         };
-        tx.insert(hearingsTable).values(nextHearingEntry).run();
+        tx.insert(hearingsTable)
+          .values(nextHearingEntry)
+          .onConflictDoUpdate({ target: [hearingsTable.case_no, hearingsTable.hearing_date], set: nextHearingEntry })
+          .run();
       }
     });
   } catch (error) {

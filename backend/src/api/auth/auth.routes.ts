@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import { login, register } from './auth.controller';
 import { tryCatchWrapper } from '../../utils/helpers';
+import { validateRequest } from '../../middleware/validateRequest';
+import { loginSchema, registerSchema } from './auth.validation';
 
 const authRoutes = Router();
 
@@ -53,7 +55,7 @@ const authRoutes = Router();
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-authRoutes.post('/register', tryCatchWrapper(register));
+authRoutes.post('/register', validateRequest(registerSchema, 'body'), tryCatchWrapper(register));
 
 /**
  * @swagger
@@ -113,6 +115,6 @@ authRoutes.post('/register', tryCatchWrapper(register));
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-authRoutes.post('/login', tryCatchWrapper(login));
+authRoutes.post('/login', validateRequest(loginSchema, 'body'), tryCatchWrapper(login));
 
 export default authRoutes;

@@ -1,7 +1,6 @@
 import { z } from "zod";
-import { loginSchema } from "../auth/auth.validation";
 
-const caseSchema = z.object({
+export const caseSchema = z.object({
   case_type: z.enum(['ITA', 'MA', 'SA']),
   s_no: z.number().int().positive(),
   place_of_filing: z.string().length(3),
@@ -34,4 +33,3 @@ export const validateCasePayload = (input: unknown) => {
 };
 
 export type CaseInput = z.infer<typeof caseSchema>;
-

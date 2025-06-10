@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { tryCatchWrapper } from '../../utils/helpers';
 
 const reportsRoutes = Router();
 
@@ -21,8 +22,8 @@ const reportsRoutes = Router();
  *                   type: string
  *                   example: Reports API is a placeholder.
  */
-reportsRoutes.get('/', (req, res) => {
+reportsRoutes.get('/', tryCatchWrapper((req, res) => {
     res.status(200).json({ message: 'Reports API is a placeholder.' });
-});
+}));
 
 export default reportsRoutes;

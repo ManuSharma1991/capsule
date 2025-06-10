@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import { addCase, getCases } from './cases.controller';
 import { tryCatchWrapper } from '../../utils/helpers';
+import { validateRequest } from '../../middleware/validateRequest';
+import { caseSchema } from './cases.validation';
 
 const caseRoutes = Router();
 
@@ -49,7 +51,7 @@ const caseRoutes = Router();
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-caseRoutes.post('/addCase', tryCatchWrapper(addCase));
+caseRoutes.post('/addCase', validateRequest(caseSchema, 'body'), tryCatchWrapper(addCase));
 
 /**
  * @swagger

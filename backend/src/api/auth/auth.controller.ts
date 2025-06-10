@@ -1,19 +1,15 @@
 import { Request, Response } from 'express';
-import { loginSchema, registerSchema } from './auth.validation';
 import * as authService from './auth.service';
+import { LoginInput, RegisterInput } from './auth.validation';
 
 export const register = async (req: Request, res: Response) => {
-  const validation = registerSchema.safeParse(req.body);
-  if (!validation.success) return res.status(400).json({ error: validation.error });
-
-  await authService.registerUser(validation.data);
+  const registerData: RegisterInput = req.body;
+  await authService.registerUser(registerData);
   return res.status(201).json({ message: 'User registered successfully' });
 };
 
 export const login = async (req: Request, res: Response) => {
-  const validation = loginSchema.safeParse(req.body);
-  if (!validation.success) return res.status(400).json({ error: validation.error });
-
-  const result = await authService.loginUser(validation.data);
+  const loginData: LoginInput = req.body;
+  const result = await authService.loginUser(loginData);
   return res.status(200).json(result);
 };

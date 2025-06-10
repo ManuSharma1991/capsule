@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { tryCatchWrapper } from '../../utils/helpers';
 
 const stagingRoutes = Router();
 
@@ -21,8 +22,8 @@ const stagingRoutes = Router();
  *                   type: string
  *                   example: Staging API is a placeholder.
  */
-stagingRoutes.get('/', (req, res) => {
+stagingRoutes.get('/', tryCatchWrapper((req, res) => {
     res.status(200).json({ message: 'Staging API is a placeholder.' });
-});
+}));
 
 export default stagingRoutes;

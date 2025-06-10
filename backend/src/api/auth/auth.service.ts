@@ -6,7 +6,7 @@ import { eq } from 'drizzle-orm';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { RegisterInput, LoginInput } from './auth.validation';
-import { EmailExistsError, UserExistsError } from '../../middleware/appError';
+import { ApiEmailExistsError, ApiUserExistsError } from '../../utils/apiError';
 import { AUTH_ERROR_CODES } from '../../utils/constants';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'secret';
@@ -17,7 +17,7 @@ export const registerUser = async (input: RegisterInput) => {
     .from(usersTable)
     .where(eq(usersTable.empId, input.empId));
   if (existingUser.length > 0) {
-    throw new UserExistsError(
+    throw new ApiUserExistsError(
       'User already exists with this employee ID',
       AUTH_ERROR_CODES.USER_ALREADY_EXISTS_EMP_ID // Explicitly pass the code
     );
@@ -28,7 +28,7 @@ export const registerUser = async (input: RegisterInput) => {
     .from(usersTable)
     .where(eq(usersTable.email, input.email));
   if (existingUserByEmail.length > 0) {
-    throw new EmailExistsError( // Uses its default message and code
+    throw new ApiEmailExistsError( // Uses its default message and code
       'An account with this email already exists.' // You can override the message if needed
     );
   }
