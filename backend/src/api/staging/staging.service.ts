@@ -16,7 +16,7 @@ export const createCase = async (data: ImportCauseListData) => {
     bench_type: data.bench_type,
     appellant_name: data.filed_by === 'A' ? data.assessee_name : null,
     respondant_name: data.filed_by === 'D' ? data.assessee_name : null,
-    assessment_year: data.assessment_year,
+    assessment_year: data.assessment_year as string,
     disputed_amount: data.disputed_amount,
     argued_by: data.argued_by,
   };
@@ -42,7 +42,10 @@ export const createCase = async (data: ImportCauseListData) => {
 
       tx.insert(hearingsTable)
         .values(firstHearing)
-        .onConflictDoUpdate({ target: [hearingsTable.case_no, hearingsTable.hearing_date], set: firstHearing })
+        .onConflictDoUpdate({
+          target: [hearingsTable.case_no, hearingsTable.hearing_date],
+          set: firstHearing,
+        })
         .run();
 
       if (data.next_hearing_date) {
@@ -52,7 +55,10 @@ export const createCase = async (data: ImportCauseListData) => {
         };
         tx.insert(hearingsTable)
           .values(nextHearingEntry)
-          .onConflictDoUpdate({ target: [hearingsTable.case_no, hearingsTable.hearing_date], set: nextHearingEntry })
+          .onConflictDoUpdate({
+            target: [hearingsTable.case_no, hearingsTable.hearing_date],
+            set: nextHearingEntry,
+          })
           .run();
       }
     });

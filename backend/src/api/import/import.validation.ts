@@ -8,7 +8,7 @@ export const importCauseListDataSchema = z.object({
   filed_by: z.enum(['A', 'D']),
   bench_type: z.enum(['DB', 'SMC']),
   assessee_name: z.string().min(1),
-  assessment_year: z.string(),
+  assessment_year: z.union([z.string(), z.number()]),
   assessed_section: z.union([z.string().optional(), z.number().optional()]),
   disputed_amount: z.number().nonnegative(),
   argued_by: z.enum(['CIT (DR)', 'Sr. DR']),
