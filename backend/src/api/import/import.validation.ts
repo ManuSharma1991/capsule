@@ -53,5 +53,47 @@ export const validateImportCauseListArrayPayload = (
   return { success: true, data: validData, errors };
 };
 
+export const importScraperDataSchema = z.object({
+  caseNo: z.string(),
+  filed_by: z.enum([' Assessee ', ' Department ']),
+  appellant_name: z.string().min(1),
+  respondant_name: z.string().min(1),
+  assessment_year: z.union([z.string(), z.number()]),
+  case_status: z.string(),
+});
+
+export const importScraperDataArraySchema = z.array(importScraperDataSchema);
+
+export const validateImportScraperDataArrayPayload = (
+  input: unknown
+): { success: true; data: ImportScraperDataArray; errors: ValidationError[] } => {
+  const validData: ImportScraperDataArray = [];
+  const errors: ValidationError[] = [];
+
+  if (!Array.isArray(input)) {
+    errors.push({
+      index: -1,
+      errors: { formErrors: ['Input is not an array'], fieldErrors: {} },
+    });
+    return { success: true, data: [], errors };
+  }
+
+  input.forEach((item, index) => {
+    const result = importScraperDataSchema.safeParse(item);
+    if (result.success) {
+      validData.push(result.data);
+    } else {
+      errors.push({
+        index: index,
+        errors: result.error.flatten(),
+      });
+    }
+  });
+
+  return { success: true, data: validData, errors };
+};
+
 export type ImportCauseListData = z.infer<typeof importCauseListDataSchema>;
 export type ImportCauseListDataArray = z.infer<typeof importCauseListArraySchema>;
+export type ImportScraperData = z.infer<typeof importScraperDataSchema>;
+export type ImportScraperDataArray = z.infer<typeof importScraperDataArraySchema>;

@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { tryCatchWrapper } from '../../utils/helpers';
-import { importCases } from './import.controller';
+import { importCases, importScraperCases } from './import.controller';
 import { excelFileToJson } from '../../utils/excelToJson';
 
 const importRoutes = Router();
@@ -57,6 +57,8 @@ const importRoutes = Router();
  */
 importRoutes.post('/importCauselistData', tryCatchWrapper(importCases));
 
+importRoutes.post('/importScraperData', tryCatchWrapper(importScraperCases));
+
 /**
  * @swagger
  * /api/import/convertExcelToJson:
@@ -86,7 +88,7 @@ importRoutes.get('/convertExcelToJson', async (req, res, next) => {
   console.log('Directory of this file (__dirname):', __dirname);
 
   try {
-    const data = await excelFileToJson('data.xlsx', {
+    const data = await excelFileToJson('scrapedata.xlsx', {
       sheetNameOrIndex: 0,
       skipBlankRows: true,
       rawValues: true,

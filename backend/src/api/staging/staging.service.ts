@@ -1,6 +1,6 @@
 import { stagingDb } from '../../db';
 import { CaseTable, caseTable, hearingsTable, HearingTable } from '../../db/schema/staging';
-import { ImportCauseListData } from '../import/import.validation';
+import { ImportCauseListData, ImportScraperData } from '../import/import.validation';
 
 export const createCase = async (data: ImportCauseListData) => {
   // generate case_no from case_type, s_no, place_of_filing, year_of_filing
@@ -61,6 +61,30 @@ export const createCase = async (data: ImportCauseListData) => {
           })
           .run();
       }
+    });
+  } catch (error) {
+    console.error('Failed to create case and hearings:', error);
+  }
+};
+
+export const createScraperCase = async (data: ImportScraperData) => {
+  // generate case_no from case_type, s_no, place_of_filing, year_of_filing
+
+  const newCase: CaseTable = {
+    case_no: data.caseNo.trimEnd(),
+    filed_by: data.filed_by.trim() === 'Assessee' ? 'ASSESSEE' : 'DEPARTMENT',
+    appellant_name: data.appellant_name.trim(),
+    respondant_name: data.respondant_name.trim(),
+    assessment_year: data.assessment_year as string,
+    case_status: data.case_status.trim(),
+  };
+
+  try {
+    stagingDb.transaction((tx) => {
+      tx.insert(caseTable)
+        .values(newCase)
+        .onConflictDoUpdate({ target: caseTable.case_no, set: newCase })
+        .run();
     });
   } catch (error) {
     console.error('Failed to create case and hearings:', error);
