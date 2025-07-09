@@ -104,16 +104,22 @@ const GenerateCauselistPage: FC = () => {
     setCasePart4(String(new Date().getFullYear()));
   };
 
-  const handleExport = () => {
-    console.log('Exporting causelist:', causelistCases);
-    // TODO: Implement export logic
-    setIsDateFixed(false); // Allow date change after export
-    setSelectedDate(null);
-    setCauselistCases([]); // Clear table after export
-    setCasePart1('ITA');
-    setCasePart2('');
-    setCasePart3('NAG');
-    setCasePart4(String(new Date().getFullYear()));
+  const handleExport = async () => {
+    try {
+      const response = await dataService.exportCauselist(causelistCases);
+      alert(`Export successful! File saved at: ${response.data.filepath}`);
+      // Reset state after successful export
+      setIsDateFixed(false);
+      setSelectedDate(null);
+      setCauselistCases([]);
+      setCasePart1('ITA');
+      setCasePart2('');
+      setCasePart3('NAG');
+      setCasePart4(String(new Date().getFullYear()));
+    } catch (error) {
+      console.error('Error exporting causelist:', error);
+      alert('Failed to export causelist. Please check the console for details.');
+    }
   };
 
   const handleMoveCase = useCallback((index: number, direction: 'up' | 'down') => {
@@ -160,6 +166,16 @@ const GenerateCauselistPage: FC = () => {
     setCauselistCases((prevCases) =>
       prevCases.filter((c) => c.id !== caseId).map((c, i) => ({ ...c, causelistSNo: i + 1 }))
     );
+  };
+
+  const handleBenchTypeChange = (caseId: string, newBenchType: string) => {
+    setCauselistCases((prevCases) => {
+      const updatedCases = prevCases.map((c) =>
+        c.id === caseId ? { ...c, benchType: newBenchType } : c
+      );
+      // Re-sort cases after changing bench type to regroup them
+      return updatedCases.sort((a, b) => (a.benchType || '').localeCompare(b.benchType || ''));
+    });
   };
 
   const handleEditChange = (
@@ -353,11 +369,11 @@ const GenerateCauselistPage: FC = () => {
                         {benchType}
                       </TableCell>
                     </TableRow>
-                    {groupedCases[benchType].map((caseItem) => (
+                    {groupedCases[benchType].map((caseItem, index) => (
                       <TableRow key={caseItem.id}>
                         {editingCaseId === caseItem.id ? (
                           <>
-                            <TableCell>{caseItem.causelistSNo}</TableCell>
+                            <TableCell>{index + 1}</TableCell>
                             <TableCell>
                               <TextField
                                 name="hearingDate"
@@ -445,7 +461,7 @@ const GenerateCauselistPage: FC = () => {
                           </>
                         ) : (
                           <>
-                            <TableCell>{caseItem.causelistSNo}</TableCell>
+                            <TableCell>{index + 1}</TableCell>
                             <TableCell>{caseItem.hearingDate}</TableCell>
                             <TableCell>{caseItem.caseNo}</TableCell>
                             <TableCell>{caseItem.filedBy}</TableCell>
@@ -460,6 +476,25 @@ const GenerateCauselistPage: FC = () => {
                             <TableCell>{caseItem.arguedBy}</TableCell>
                             <TableCell>{caseItem.remarks}</TableCell>
                             <TableCell>
+                              {benchType === 'Uncategorized' && (
+                                <FormControl size="small" sx={{ minWidth: 120, mr: 1 }}>
+                                  <Select
+                                    value={caseItem.benchType || ''}
+                                    onChange={(e) =>
+                                      handleBenchTypeChange(caseItem.id, e.target.value as string)
+                                    }
+                                    displayEmpty
+                                  >
+                                    <MenuItem value="" disabled>
+                                      Assign
+                                    </MenuItem>
+                                    <MenuItem value="DB">DB</MenuItem>
+                                    <MenuItem value="SMC">SMC</MenuItem>
+                                    <MenuItem value="PHM">PHM</MenuItem>
+                                    <MenuItem value="TMB">TMB</MenuItem>
+                                  </Select>
+                                </FormControl>
+                              )}
                               <IconButton onClick={() => handleEditCase(caseItem.id)} size="small">
                                 <EditIcon fontSize="small" />
                               </IconButton>
@@ -473,7 +508,7 @@ const GenerateCauselistPage: FC = () => {
                                 onClick={() =>
                                   handleMoveCase(causelistCases.indexOf(caseItem), 'up')
                                 }
-                                disabled={causelistCases.indexOf(caseItem) === 0}
+                                disabled={index === 0}
                                 size="small"
                               >
                                 <ArrowUpwardIcon fontSize="small" />
@@ -482,9 +517,7 @@ const GenerateCauselistPage: FC = () => {
                                 onClick={() =>
                                   handleMoveCase(causelistCases.indexOf(caseItem), 'down')
                                 }
-                                disabled={
-                                  causelistCases.indexOf(caseItem) === causelistCases.length - 1
-                                }
+                                disabled={index === groupedCases[benchType].length - 1}
                                 size="small"
                               >
                                 <ArrowDownwardIcon fontSize="small" />
@@ -507,7 +540,11 @@ const GenerateCauselistPage: FC = () => {
           variant="contained"
           color="primary"
           onClick={handleSave}
-          disabled={!isDateFixed || causelistCases.length === 0}
+          disabled={
+            !isDateFixed ||
+            causelistCases.length === 0 ||
+            (groupedCases['Uncategorized']?.length || 0) > 0
+          }
         >
           Save Causelist
         </Button>
@@ -515,7 +552,11 @@ const GenerateCauselistPage: FC = () => {
           variant="outlined"
           color="secondary"
           onClick={handleExport}
-          disabled={!isDateFixed || causelistCases.length === 0}
+          disabled={
+            !isDateFixed ||
+            causelistCases.length === 0 ||
+            (groupedCases['Uncategorized']?.length || 0) > 0
+          }
         >
           Export Causelist
         </Button>

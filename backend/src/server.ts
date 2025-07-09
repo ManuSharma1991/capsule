@@ -14,6 +14,7 @@ import caseRoutes from './api/cases/cases.routes';
 import authRoutes from './api/auth/auth.routes';
 import importRoutes from './api/import/import.routes';
 import lookupsRoutes from './api/lookups/lookups.routes';
+import reportsRoutes from './api/reports/reports.routes';
 
 // --- Load Environment Variables ---
 dotenv.config();
@@ -80,6 +81,7 @@ app.use('/api/auth', authRoutes); // Assuming auth.routes exports a router
 app.use('/api/cases', caseRoutes);
 app.use('/api/import', importRoutes);
 app.use('/api/lookups', lookupsRoutes);
+app.use('/api/reports', reportsRoutes);
 
 // --- Error Handler ---
 app.use(errorHandler); // Custom handler for known errors
