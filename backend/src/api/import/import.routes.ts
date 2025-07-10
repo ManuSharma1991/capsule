@@ -88,7 +88,7 @@ importRoutes.get('/convertExcelToJson', async (req, res, next) => {
   console.log('Directory of this file (__dirname):', __dirname);
 
   try {
-    const data = await excelFileToJson('scrapedata.xlsx', {
+    const data = await excelFileToJson('dataNew.xlsx', {
       sheetNameOrIndex: 0,
       skipBlankRows: true,
       rawValues: true,
